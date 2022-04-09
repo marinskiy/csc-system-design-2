@@ -14,7 +14,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ./${{ github.event.repository.name }}/testing_venv/
-          key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{hashFiles( env.REQUIREMENTS_PATH ) }}
+          key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{hashFiles( ${{ env.REQUIREMENTS_PATH }} ) }}
       - uses: conda-incubator/setup-miniconda@v2
       - name: conda-environment-installation
         working-directory: ${{ github.event.repository.name }}
@@ -33,7 +33,7 @@ jobs:
        uses: actions/cache@v2
        with:
          path: ./${{ github.event.repository.name }}/testing_venv/
-         key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{hashFiles( env.REQUIREMENTS_PATH ) }}
+         key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{hashFiles( ${{ env.REQUIREMENTS_PATH }} ) }}
      - name: run-tests
        run: make test
      - name: run-linters
