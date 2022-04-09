@@ -112,7 +112,7 @@ clean:
 
 .PHONY: install
 install: PIP=${VENV_PIP}
-install: .install
+install: .install  ## Installs lib from sources to pip
 
 .PHONY: .uninstall
 .uninstall:
@@ -120,7 +120,7 @@ install: .install
 
 .PHONY: uninstall
 uninstall: PIP=${VENV_PIP}
-uninstall: .uninstall
+uninstall: .uninstall  ## Uninstalls lib from sources from pip
 
 .PHONY: .local-conda-env-create
 .local-conda-env-create:
