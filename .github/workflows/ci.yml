@@ -1,0 +1,42 @@
+name: CI
+on: [ push, workflow_dispatch ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      - name: cache-testing-venv
+        uses: actions/cache@v2
+        env:
+          # Increase this value to reset cache if etc/example-environment.yml has not changed
+          CACHE_NUMBER: 1
+        with:
+          path: ./cli/testing_venv/
+          key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{hashFiles('cli/environment.yml') }}
+      - uses: conda-incubator/setup-miniconda@v2
+      - name: conda-environment-installation
+        working-directory: cli
+        run: make .testing-venv
+  test:
+   runs-on: ubuntu-latest
+   needs: [ build ]
+   defaults:
+     run:
+      working-directory: cli
+   steps:
+     - uses: actions/checkout@v2
+       with:
+          path: ./
+     - name: cache-testing-venv
+       uses: actions/cache@v2
+       env:
+         # Increase this value to reset cache if etc/example-environment.yml has not changed
+         CACHE_NUMBER: 1
+       with:
+         path: ./cli/testing_venv/
+         key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('cli/environment.yml') }}
+     - name: run-tests
+       run: make test
+     - name: run-linters
+       run: make lint
