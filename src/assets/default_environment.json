@@ -1,0 +1,12 @@
+{
+  "mapMinWidth": 30,
+  "mapMaxWidth": 100,
+  "mapMinHeight": 30,
+  "mapMaxHeight": 100,
+  "obstacleProbability": 0.05,
+  "treasureProbability": 0.01,
+  "treasureStatMinHealth": -10,
+  "treasureStatMaxHealth": 30,
+  "treasureStatMinAttack": -10,
+  "treasureStatMaxAttack": 30
+}
