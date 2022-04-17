@@ -9,6 +9,17 @@ from roguelike.game_engine.env_manager.env_manager import Environment, Inventory
 from roguelike.game_engine.env_manager.map_objects_storage import PlayerCharacter
 
 
+class Key(Enum):
+    W = auto()
+    A = auto()
+    S = auto()
+    D = auto()
+    E = auto()
+    II = auto()
+    M = auto()
+    Q = auto()
+
+
 class Mode(Enum):
     INVENTORY = auto()
     MAP = auto()
@@ -35,3 +46,4 @@ class GameState:
         self.environment = environment
         self.inventory = inventory
         self.player = player
+        self.running = True
