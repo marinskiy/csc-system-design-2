@@ -1,12 +1,30 @@
 {
-  "mapMinWidth": 30,
-  "mapMaxWidth": 100,
-  "mapMinHeight": 30,
-  "mapMaxHeight": 100,
-  "obstacleProbability": 0.05,
-  "treasureProbability": 0.01,
-  "treasureStatMinHealth": -10,
-  "treasureStatMaxHealth": 30,
-  "treasureStatMinAttack": -10,
-  "treasureStatMaxAttack": 30
+  "map": {
+    "width": {
+      "min": 30,
+      "max": 100
+    },
+    "height": {
+      "min": 30,
+      "max": 100
+    }
+  },
+  "objects": {
+    "obstacle": {
+      "probability": 0.05
+    },
+    "treasure": {
+      "probability": 0.01,
+      "stats": {
+        "health": {
+          "min": -10,
+          "max": 30
+        },
+        "attack": {
+          "min": -10,
+          "max": 30
+        }
+      }
+    }
+  }
 }
