@@ -43,10 +43,9 @@ class Inventory:
         self._presenter = InventoryPresenter(treasures)
 
     def get_additional_stats(self) -> Stats:
-        final_stats = sum((treasure.stats
-                          for treasure, is_on in self._treasure_is_worn.items()
-                          if is_on), Stats(0, 0))
-        return final_stats
+        return sum((treasure.stats
+                    for treasure, is_on in self._treasure_is_worn.items()
+                    if is_on), Stats(0.0, 0.0))
 
     def change_treasure_state(self, treasure: Treasure) -> None:
         self._treasure_is_worn[treasure] = not self._treasure_is_worn[treasure]
