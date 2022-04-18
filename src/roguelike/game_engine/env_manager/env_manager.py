@@ -45,7 +45,7 @@ class Inventory:
     def get_additional_stats(self) -> Stats:
         return sum((treasure.stats
                     for treasure, is_on in self._treasure_is_worn.items()
-                    if is_on), Stats(0.0, 0.0))
+                    if is_on), start=Stats(0.0, 0.0))
 
     def change_treasure_state(self, treasure: Treasure) -> None:
         self._treasure_is_worn[treasure] = not self._treasure_is_worn[treasure]
