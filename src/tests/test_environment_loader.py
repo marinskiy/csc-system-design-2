@@ -4,7 +4,7 @@ import pytest
 import os
 from roguelike.game_engine.env_manager.map import MapCoordinates
 from roguelike.game_engine.env_manager.map_objects_storage import Stats, Obstacle, Treasure, PlayerCharacter
-from roguelike.game_engine.game_manager.game_constructor.environment_loader import GameLoader
+from roguelike.game_engine.game_manager.game_constructor.game_loader import GameLoader
 
 
 def test_coordinates_load_correctly() -> None:
