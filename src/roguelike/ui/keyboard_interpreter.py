@@ -1,8 +1,10 @@
 """Contains class and function for interpreting keyboard input"""
 
 import typing as tp
-from roguelike.game_engine.game_manager.game_processor.game_state import Key
+
 from pynput import keyboard
+
+from roguelike.game_engine.game_manager.game_processor.game_state import Key
 
 key_pressed = ""
 

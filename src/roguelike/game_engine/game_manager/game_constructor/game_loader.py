@@ -2,8 +2,8 @@
 Contains all classes needed to load game
 """
 
-import typing as tp
 import json
+import typing as tp
 
 from roguelike.game_engine.env_manager.env_manager import Environment, Inventory
 from roguelike.game_engine.env_manager.map import MapCoordinates, Map

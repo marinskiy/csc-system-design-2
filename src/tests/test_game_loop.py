@@ -1,7 +1,8 @@
 """Game loop tests"""
 
-import pytest
 import os
+
+import pytest
 
 from roguelike.game_engine.env_manager.map import MapCoordinates
 from roguelike.game_engine.env_manager.map_objects_storage import PlayerCharacter

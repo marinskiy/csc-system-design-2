@@ -3,6 +3,7 @@ Contains all classes to create character
 """
 import json
 import os
+
 from roguelike.game_engine.env_manager.map_objects_storage import PlayerCharacter, Stats
 
 
