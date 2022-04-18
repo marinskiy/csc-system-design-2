@@ -74,11 +74,13 @@ class Map:
         self._map_object_to_coord[map_object] = coordinates
 
     def get_objects(self, coordinates: MapCoordinates) -> tp.Collection[MapObject]:
+        self._validate_coordinates(coordinates)
         return self._coord_to_cell[coordinates].items
 
     def add_object(self, coordinates: MapCoordinates, map_object: MapObject) -> None:
         # todo: design
         #  added coordinates as arg
+        self._validate_coordinates(coordinates)
         self._coord_to_cell[coordinates].add(map_object)
         self._map_object_to_coord[map_object] = coordinates
 
