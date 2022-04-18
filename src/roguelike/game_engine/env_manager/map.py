@@ -59,9 +59,9 @@ class Map:
             raise ValueError('Invalid map size. Must be at least 1x1.')
 
     def _validate_coordinates(self, coordinates: MapCoordinates) -> None:
-        x_is_out_of_bounds = coordinates.x < 0 or coordinates.x >= self._width
-        y_is_out_of_bounds = coordinates.y < 0 or coordinates.y >= self._height
-        if x_is_out_of_bounds or y_is_out_of_bounds:
+        x_within_bounds = 0 <= coordinates.x < self._width
+        y_within_bounds = 0 <= coordinates.y < self._height
+        if not (x_within_bounds and y_within_bounds):
             raise ValueError(f'Invalid coordinates. '
                              f'Must be within the map bounds '
                              f'([0, {self._width-1}], [0, {self._height-1}])')
