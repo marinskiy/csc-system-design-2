@@ -14,8 +14,8 @@ class Drawable:
 class InventoryPresenter(Drawable):
     """Class that governs the presentation of the Inventory"""
 
-    def __init__(self, treasures: tp.List[Treasure]) -> None:
-        self._treasures = treasures
+    def __init__(self, treasures: tp.Iterable[Treasure]) -> None:
+        self._treasures = list(treasures)
         self._current = 0
 
     def add_treasure(self, treasure: Treasure) -> None:
