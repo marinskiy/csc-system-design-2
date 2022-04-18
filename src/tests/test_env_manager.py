@@ -89,16 +89,25 @@ def test_map_moves_objects(
     assert not map_with_obstacle.get_objects(obstacle_coordinates)
     assert obstacle in map_with_obstacle.get_objects(updated_object_coordinates)
 
-    with pytest.raises(ValueError):
-        map_with_obstacle.move_to(obstacle, MapCoordinates(3, 0))
-        map_with_obstacle.move_to(obstacle, MapCoordinates(0, 3))
-        map_with_obstacle.move_to(obstacle, MapCoordinates(3, 3))
-        map_with_obstacle.move_to(obstacle, MapCoordinates(-1, 0))
-        map_with_obstacle.move_to(obstacle, MapCoordinates(0, -1))
-        map_with_obstacle.move_to(obstacle, MapCoordinates(-1, -1))
+
+def test_map_does_not_move_objects_to_out_of_map_coordinates(
+        map_with_obstacle: Map,
+        obstacle_coordinates: MapCoordinates,
+        obstacle: Obstacle,
+) -> None:
+    for new_coordinates in (
+            MapCoordinates(3, 0),
+            MapCoordinates(0, 3),
+            MapCoordinates(3, 3),
+            MapCoordinates(-1, 0),
+            MapCoordinates(0, -1),
+            MapCoordinates(-1, -1),
+    ):
+        map_with_obstacle.move_to(obstacle, new_coordinates)
+        assert obstacle_coordinates == map_with_obstacle.get_coordinates(obstacle)
 
 
-def test_get_coordinates() -> None:
+def test_map_returns_coordinates() -> None:
     map_ = Map(2, 2)
     obstacle_0 = Obstacle()
     obstacle_1 = Obstacle()
@@ -115,6 +124,37 @@ def test_get_coordinates() -> None:
     assert map_.get_coordinates(obstacle_3) == MapCoordinates(1, 1)
 
 
+def test_map_does_not_return_out_of_map_coordinates(
+        obstacle: Obstacle,
+) -> None:
+    map_ = Map(1, 1)
+    map_.add_object(MapCoordinates(0, 0), obstacle)
+    for coordinates in (
+            MapCoordinates(0, -1),
+            MapCoordinates(-1, 0),
+            MapCoordinates(-1, -1),
+            MapCoordinates(0, 1),
+            MapCoordinates(1, 0),
+            MapCoordinates(1, 1),
+    ):
+        assert map_.get_objects(coordinates) == ()
+
+
+def test_map_does_not_add_objects_to_out_of_map_coordinates() -> None:
+    map_ = Map(1, 1)
+    for coordinates in (
+            MapCoordinates(0, -1),
+            MapCoordinates(-1, 0),
+            MapCoordinates(-1, -1),
+            MapCoordinates(0, 1),
+            MapCoordinates(1, 0),
+            MapCoordinates(1, 1),
+    ):
+        obstacle = Obstacle()
+        map_.add_object(coordinates, obstacle)
+        assert map_.get_coordinates(obstacle) is None
+
+
 def test_map_removes_objects(
         map_with_obstacle: Map,
         obstacle_coordinates: MapCoordinates,
@@ -122,6 +162,43 @@ def test_map_removes_objects(
 ) -> None:
     map_with_obstacle.remove_object(obstacle)
     assert not map_with_obstacle.get_objects(obstacle_coordinates)
+
+
+def test_map_does_not_add_object_that_is_already_on_the_map(
+        map_with_obstacle: Map,
+        obstacle: Obstacle,
+        obstacle_coordinates: MapCoordinates,
+) -> None:
+    new_coordinates = MapCoordinates(obstacle_coordinates.x + 1,
+                                     obstacle_coordinates.y)
+    with pytest.raises(ValueError):
+        map_with_obstacle.add_object(new_coordinates, obstacle)
+
+
+def test_map_does_not_move_object_that_is_not_on_the_map(
+        obstacle: Obstacle,
+) -> None:
+    map_ = Map(1, 1)
+    map_.move_to(obstacle, MapCoordinates(0, 0))
+    assert map_.get_objects(MapCoordinates(0, 0)) == ()
+
+
+def test_map_does_not_remove_object_that_is_not_on_the_map() -> None:
+    map_ = Map(1, 1)
+    obstacle_first = Obstacle()
+    obstacle_second = Obstacle()
+    map_.add_object(MapCoordinates(0, 0), obstacle_first)
+    map_.remove_object(obstacle_second)
+    objects_listing = map_.get_objects(MapCoordinates(0, 0))
+    assert len(objects_listing) == 1
+    assert obstacle_first in objects_listing
+
+
+def test_map_does_not_get_object_that_is_not_on_the_map(
+        obstacle: Obstacle,
+) -> None:
+    map_ = Map(1, 1)
+    assert map_.get_coordinates(obstacle) is None
 
 
 def test_map_removes_objects_after_they_been_moved(
@@ -157,14 +234,14 @@ def test_inventory_calculates_additional_stats_correctly(
     # 3 treasures in inventory, 0 is on
     inventory = Inventory(treasures)
     for treasure in treasures:
-        inventory.put_on(treasure)
+        inventory.change_treasure_state(treasure)
         assert inventory.get_additional_stats() == treasure.stats
-        inventory.put_off(treasure)
+        inventory.change_treasure_state(treasure)
 
     total_stats = Stats(0, 0)
     inventory = Inventory(treasures)
     for treasure in treasures:
-        inventory.put_on(treasure)
+        inventory.change_treasure_state(treasure)
         total_stats += treasure.stats
     additional_stats = inventory.get_additional_stats()
     assert additional_stats == total_stats

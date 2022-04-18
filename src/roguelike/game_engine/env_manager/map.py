@@ -58,37 +58,46 @@ class Map:
         if map_width < 1 or map_height < 1:
             raise ValueError('Invalid map size. Must be at least 1x1.')
 
-    def _validate_coordinates(self, coordinates: MapCoordinates) -> None:
+    def _are_valid_coordinates(self, coordinates: MapCoordinates) -> bool:
         x_within_bounds = 0 <= coordinates.x < self._width
         y_within_bounds = 0 <= coordinates.y < self._height
-        if not (x_within_bounds and y_within_bounds):
-            raise ValueError(f'Invalid coordinates. '
-                             f'Must be within the map bounds '
-                             f'([0, {self._width-1}], [0, {self._height-1}])')
+        return x_within_bounds and y_within_bounds
+
+    def _is_on_the_map(self, map_object: MapObject) -> bool:
+        return map_object in self._map_object_to_coord
 
     def move_to(self, map_object: MapObject, coordinates: MapCoordinates) -> None:
-        self._validate_coordinates(coordinates)
+        if not self._are_valid_coordinates(coordinates) or not self._is_on_the_map(map_object):
+            return
         self._coord_to_cell[coordinates].add(map_object)
         old_coordinates = self._map_object_to_coord.pop(map_object)
         self._coord_to_cell[old_coordinates].remove(map_object)
         self._map_object_to_coord[map_object] = coordinates
 
     def get_objects(self, coordinates: MapCoordinates) -> tp.Collection[MapObject]:
-        self._validate_coordinates(coordinates)
+        if not self._are_valid_coordinates(coordinates):
+            return ()
         return self._coord_to_cell[coordinates].items
 
     def add_object(self, coordinates: MapCoordinates, map_object: MapObject) -> None:
         # todo: design
         #  added coordinates as arg
-        self._validate_coordinates(coordinates)
+        if not self._are_valid_coordinates(coordinates):
+            return
+        if self._is_on_the_map(map_object):
+            raise ValueError('Adding object that is already on the map')
         self._coord_to_cell[coordinates].add(map_object)
         self._map_object_to_coord[map_object] = coordinates
 
     def remove_object(self, map_object: MapObject) -> None:
         # todo: design
         #  added coordinates as arg
+        if not self._is_on_the_map(map_object):
+            return
         coordinates = self._map_object_to_coord.pop(map_object)
         self._coord_to_cell[coordinates].remove(map_object)
 
     def get_coordinates(self, map_object: MapObject) -> tp.Optional[MapCoordinates]:
-        return self._map_object_to_coord.get(map_object)
+        if not self._is_on_the_map(map_object):
+            return None
+        return self._map_object_to_coord[map_object]
