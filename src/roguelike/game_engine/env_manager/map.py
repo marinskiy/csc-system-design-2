@@ -44,9 +44,9 @@ class Map:
     """Container for interacting with objects on the map"""
 
     def __init__(self, map_width: int, map_height: int) -> None:
+        self._validate_map_size(map_width, map_height)
         self._height = map_height
         self._width = map_width
-        self._validate_map_size(map_width, map_height)
         self._coord_to_cell: tp.Dict[MapCoordinates, MapCell] = {
             MapCoordinates(x, y): MapCell()
             for x, y in product(range(map_width), range(map_height))
