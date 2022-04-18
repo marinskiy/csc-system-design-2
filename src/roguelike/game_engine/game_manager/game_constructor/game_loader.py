@@ -75,6 +75,7 @@ class GameLoader:
                 raise ValueError("Invalid map object json format")
 
             coords = GameLoader._load_coordinates(map_object_json["pos"])
+            world_object: MapObject
 
             if map_object_json["type"] == "player":
                 world_object = GameLoader._load_player(map_object_json["settings"])

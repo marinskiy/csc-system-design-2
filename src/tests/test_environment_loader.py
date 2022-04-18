@@ -73,8 +73,8 @@ def test_load_from_file() -> None:
 
     assert state.player.stats == Stats(100.0, 100.0)
 
-    assert isinstance(state.environment.map.get_objects(MapCoordinates(0, 0))[0], Obstacle)
-    assert isinstance(state.environment.map.get_objects(MapCoordinates(7, 7))[0], Obstacle)
-    assert isinstance(state.environment.map.get_objects(MapCoordinates(20, 20))[0], Treasure)
-    assert isinstance(state.environment.map.get_objects(MapCoordinates(0, 20))[0], Treasure)
-    assert isinstance(state.environment.map.get_objects(MapCoordinates(10, 10))[0], PlayerCharacter)
+    assert isinstance(list(state.environment.map.get_objects(MapCoordinates(0, 0)))[0], Obstacle)
+    assert isinstance(list(state.environment.map.get_objects(MapCoordinates(7, 7)))[0], Obstacle)
+    assert isinstance(list(state.environment.map.get_objects(MapCoordinates(20, 20)))[0], Treasure)
+    assert isinstance(list(state.environment.map.get_objects(MapCoordinates(0, 20)))[0], Treasure)
+    assert isinstance(list(state.environment.map.get_objects(MapCoordinates(10, 10)))[0], PlayerCharacter)
