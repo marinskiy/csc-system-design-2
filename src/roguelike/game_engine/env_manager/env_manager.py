@@ -10,14 +10,14 @@ from roguelike.game_engine.env_manager.map_objects_storage import Treasure, MapO
 class Inventory:
     """Class for describing player's inventory"""
 
-    def __init__(self, treasures: tp.List[Treasure]) -> None:
+    def __init__(self, treasures: tp.Iterable[Treasure]) -> None:
         self._treasure_is_worn = {treasure: False for treasure in treasures}
 
     def get_additional_stats(self) -> Stats:
-        final_stats = sum(treasure.stats
+        final_stats = sum((treasure.stats
                           for treasure, is_on in self._treasure_is_worn.items()
-                          if is_on)
-        return tp.cast(Stats, final_stats)
+                          if is_on), Stats(0, 0))
+        return final_stats
 
     def put_on(self, treasure: Treasure) -> None:
         self._treasure_is_worn[treasure] = True

@@ -43,20 +43,31 @@ class MapCell:
 class Map:
     """Container for interacting with objects on the map"""
 
-    def __init__(self, map_height: int, map_width: int) -> None:
-        self._validate_map_size(map_height, map_width)
+    def __init__(self, map_width: int, map_height: int) -> None:
+        self._height = map_height
+        self._width = map_width
+        self._validate_map_size(map_width, map_height)
         self._coord_to_cell: tp.Dict[MapCoordinates, MapCell] = {
             MapCoordinates(x, y): MapCell()
-            for x, y in product(range(map_height), range(map_width))
+            for x, y in product(range(map_width), range(map_height))
         }
         self._map_object_to_coord: tp.Dict[MapObject, MapCoordinates] = {}
 
     @staticmethod
-    def _validate_map_size(map_height: int, map_width: int) -> None:
+    def _validate_map_size(map_width: int, map_height: int) -> None:
         if map_width < 1 or map_height < 1:
             raise ValueError('Invalid map size. Must be at least 1x1.')
 
+    def _validate_coordinates(self, coordinates: MapCoordinates) -> None:
+        x_is_out_of_bounds = coordinates.x < 0 or coordinates.x >= self._width
+        y_is_out_of_bounds = coordinates.y < 0 or coordinates.y >= self._height
+        if x_is_out_of_bounds or y_is_out_of_bounds:
+            raise ValueError(f'Invalid coordinates. '
+                             f'Must be within the map bounds '
+                             f'([0, {self._width-1}], [0, {self._height-1}])')
+
     def move_to(self, map_object: MapObject, coordinates: MapCoordinates) -> None:
+        self._validate_coordinates(coordinates)
         self._coord_to_cell[coordinates].add(map_object)
         old_coordinates = self._map_object_to_coord.pop(map_object)
         self._coord_to_cell[old_coordinates].remove(map_object)
@@ -76,3 +87,6 @@ class Map:
         #  added coordinates as arg
         coordinates = self._map_object_to_coord.pop(map_object)
         self._coord_to_cell[coordinates].remove(map_object)
+
+    def get_coordinates(self, map_object: MapObject) -> tp.Optional[MapCoordinates]:
+        return self._map_object_to_coord.get(map_object)
