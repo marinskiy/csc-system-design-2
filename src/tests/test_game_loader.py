@@ -81,7 +81,8 @@ def test_map_object_load_correctly() -> None:
 def test_map_load_correctly() -> None:
     test_map = GameLoader._load_map({"width": 60, "height": 40})  # pylint: disable=W0212+
 
-    assert test_map.get_dimensions() == (60, 40)
+    assert test_map._width == 60  # pylint: disable=W0212+
+    assert test_map._height == 40  # pylint: disable=W0212+
 
     with pytest.raises(ValueError):
         GameLoader._load_map({})  # pylint: disable=W0212

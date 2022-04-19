@@ -91,6 +91,3 @@ class Map:
 
     def get_coordinates(self, map_object: MapObject) -> tp.Optional[MapCoordinates]:
         return self._map_object_to_coord.get(map_object)
-
-    def get_dimensions(self) -> tp.Tuple[int, int]:
-        return self._width, self._height
