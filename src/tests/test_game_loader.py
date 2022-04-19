@@ -60,6 +60,24 @@ def test_player_load_correctly() -> None:
             {"name": "Super Helmet", "stats": {"health": 10.0, "attack": 0.0}})
 
 
+def test_map_object_load_correctly() -> None:
+    test_object, coords = GameLoader._load_world_object(  # pylint: disable=W0212
+        {"type": "player", "pos": [10, 10], "settings": {"stats": {"health": 100.0, "attack": 100.0}}})
+    assert isinstance(test_object, PlayerCharacter)
+    assert coords == MapCoordinates(10, 10)
+
+    test_object, coords = GameLoader._load_world_object(  # pylint: disable=W0212
+        {"type": "obstacle", "pos": [0, 0], "settings": {}})
+    assert isinstance(test_object, Obstacle)
+    assert coords == MapCoordinates(0, 0)
+
+    test_object, coords = GameLoader._load_world_object(  # pylint: disable=W0212
+        {"type": "treasure", "pos": [20, 20],
+         "settings": {"name": "Super Helmet", "stats": {"health": 10.0, "attack": 0.0}}})
+    assert isinstance(test_object, Treasure)
+    assert coords == MapCoordinates(20, 20)
+
+
 def test_map_load_correctly() -> None:
     test_map = GameLoader._load_map({"width": 60, "height": 40})  # pylint: disable=W0212+
 
