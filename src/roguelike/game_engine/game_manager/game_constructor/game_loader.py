@@ -22,7 +22,7 @@ class GameLoader:
         return GameState(Mode.MAP, Environment(geomap, world_objects), Inventory([]), player)
 
     @staticmethod
-    def _check_dict_fields(value: tp.Dict[str, float], names: tp.List[str]) -> bool:
+    def _check_dict_fields(value: tp.Dict[str, tp.Any], names: tp.List[str]) -> bool:
         if len(value) != len(names):
             return False
         for name in names:
