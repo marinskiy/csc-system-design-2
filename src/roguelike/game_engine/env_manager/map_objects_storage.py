@@ -5,23 +5,29 @@ All those objects must inherit from `MapObject` class.
 Some objects may have `Stats` for changing owner characteristics.
 """
 
-from dataclasses import dataclass
 import typing as tp
+from dataclasses import dataclass
 
+from PIL import Image, ImageDraw
+
+from roguelike.ui.drawable import Drawable
 
 __all__ = ['MapObject', 'Treasure', 'Obstacle', 'PlayerCharacter']
 
 
-class MapObject:
+class MapObject(Drawable):
     pass
 
 
 class Obstacle(MapObject):
-    pass
+    def draw(self, width: int, height: int) -> Image:
+        return Image.new('RGB', (width, height), 'blue')
 
 
 @dataclass
 class Stats:
+    """Stats class"""
+
     health: float
     attack: float
 
@@ -33,6 +39,8 @@ class Stats:
 
 
 class PlayerCharacter(MapObject):
+    """Player Object"""
+
     def __init__(self, stats: Stats) -> None:
         super().__init__()
         self._stats = stats
@@ -40,6 +48,9 @@ class PlayerCharacter(MapObject):
     @property
     def stats(self) -> Stats:
         return self._stats
+
+    def draw(self, width: int, height: int) -> Image:
+        return Image.new('RGB', (width, height), 'purple')
 
 
 class Treasure(MapObject):
@@ -57,3 +68,13 @@ class Treasure(MapObject):
     @property
     def name(self) -> str:
         return self._name
+
+    def draw(self, width: int, height: int) -> Image:
+        img = Image.new('RGB', (width, height), 'cyan')
+        draw = ImageDraw.Draw(img)
+        text = f'{int(self._stats.attack)}/{int(self._stats.health)}'
+        textwidth, textheight = draw.textsize(text)
+        x = (width - textwidth) // 2
+        y = (height - textheight) // 2
+        draw.text((x, y), text)
+        return img
