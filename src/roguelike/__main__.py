@@ -13,6 +13,6 @@ if __name__ == '__main__':
     current_state = GameLoader.load_game(file_path)
     loop = GameLoop(current_state)
 
-    while current_state.running and current_state.player.stats.health > 0:
+    while current_state.running and current_state.player.stats.health:
         key = KeyboardInterpreter.get_next_key()
         current_state = loop.run_game_turn(key)
