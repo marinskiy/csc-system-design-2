@@ -58,12 +58,12 @@ class Map:
         if map_width < 1 or map_height < 1:
             raise ValueError('Invalid map size. Must be at least 1x1.')
 
-    def _validate_coordinates(self, coordinates: MapCoordinates) -> bool:
+    def _are_valid_coordinates(self, coordinates: MapCoordinates) -> bool:
         x, y = coordinates.x, coordinates.y
         return 0 <= x < self._width and 0 <= y < self._height
 
     def move_to(self, map_object: MapObject, coordinates: MapCoordinates) -> None:
-        if not self._validate_coordinates(coordinates):
+        if not self._are_valid_coordinates(coordinates):
             return
         self._coord_to_cell[coordinates].add(map_object)
         old_coordinates = self._map_object_to_coord.pop(map_object)
@@ -71,14 +71,14 @@ class Map:
         self._map_object_to_coord[map_object] = coordinates
 
     def get_objects(self, coordinates: MapCoordinates) -> tp.Collection[MapObject]:
-        if not self._validate_coordinates(coordinates):
+        if not self._are_valid_coordinates(coordinates):
             return ()
         return self._coord_to_cell[coordinates].items
 
     def add_object(self, coordinates: MapCoordinates, map_object: MapObject) -> None:
         # todo: design
         #  added coordinates as arg
-        if not self._validate_coordinates(coordinates):
+        if not self._are_valid_coordinates(coordinates):
             return
         self._coord_to_cell[coordinates].add(map_object)
         self._map_object_to_coord[map_object] = coordinates
