@@ -30,7 +30,7 @@ class InventoryPresenter(Drawable):
             self._current -= 1
 
     def get_selected(self) -> tp.Optional[Treasure]:
-        if len(self._treasures) > 0:
+        if self._treasures:
             return self._treasures[self._current]
         return None
 

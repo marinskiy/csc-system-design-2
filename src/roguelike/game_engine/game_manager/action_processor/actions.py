@@ -18,11 +18,11 @@ class ActionManager:
         self._inventory_factory = InventoryActionFactory()
         self._menu_factory = MenuActionFactory()
 
-    def get(self, key: Key, state: GameState) -> tp.Callable[[GameState], None]:
-        if self._menu_factory.valid_key(key):
-            return self._menu_factory.get(key)
-        if state.mode == Mode.MAP and self._map_factory.valid_key(key):
-            return self._map_factory.get(key)
-        elif state.mode == Mode.INVENTORY and self._inventory_factory.valid_key(key):
-            return self._inventory_factory.get(key)
+    def get_action(self, key: Key, state: GameState) -> tp.Callable[[GameState], None]:
+        if self._menu_factory.is_valid_key(key):
+            return self._menu_factory.get_action(key)
+        if state.mode == Mode.MAP and self._map_factory.is_valid_key(key):
+            return self._map_factory.get_action(key)
+        elif state.mode == Mode.INVENTORY and self._inventory_factory.is_valid_key(key):
+            return self._inventory_factory.get_action(key)
         return _no_action

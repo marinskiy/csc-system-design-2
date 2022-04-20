@@ -32,13 +32,13 @@ def get_actions() -> ActionManager:
 
 def test_switch_mode(state: GameState, actions: ActionManager) -> None:
     assert state.mode == Mode.MAP
-    actions.get(Key.M, state)(state)
+    actions.get_action(Key.M, state)(state)
     assert state.mode == Mode.MAP
-    actions.get(Key.II, state)(state)
+    actions.get_action(Key.II, state)(state)
     assert state.mode == Mode.INVENTORY
-    actions.get(Key.II, state)(state)
+    actions.get_action(Key.II, state)(state)
     assert state.mode == Mode.INVENTORY
-    actions.get(Key.M, state)(state)
+    actions.get_action(Key.M, state)(state)
     assert state.mode == Mode.MAP
 
 
@@ -48,22 +48,22 @@ def test_move_player(state: GameState, actions: ActionManager) -> None:
 
     assert geomap.get_coordinates(player) == MapCoordinates(1, 1)
 
-    actions.get(Key.S, state)(state)
+    actions.get_action(Key.S, state)(state)
     assert geomap.get_coordinates(player) == MapCoordinates(1, 1)
 
-    actions.get(Key.A, state)(state)
+    actions.get_action(Key.A, state)(state)
     assert geomap.get_coordinates(player) == MapCoordinates(1, 1)
 
-    actions.get(Key.W, state)(state)
+    actions.get_action(Key.W, state)(state)
     assert geomap.get_coordinates(player) == MapCoordinates(1, 0)
 
-    actions.get(Key.D, state)(state)
+    actions.get_action(Key.D, state)(state)
     assert geomap.get_coordinates(player) == MapCoordinates(2, 0)
 
-    actions.get(Key.S, state)(state)
+    actions.get_action(Key.S, state)(state)
     assert geomap.get_coordinates(player) == MapCoordinates(2, 1)
 
-    actions.get(Key.A, state)(state)
+    actions.get_action(Key.A, state)(state)
     assert geomap.get_coordinates(player) == MapCoordinates(1, 1)
 
 
@@ -75,15 +75,15 @@ def test_take_treasure(state: GameState, actions: ActionManager) -> None:
 
     assert inventory.get_treasures() == (boots, )
 
-    actions.get(Key.E, state)(state)
+    actions.get_action(Key.E, state)(state)
     assert inventory.get_treasures() == (boots,)
 
-    actions.get(Key.D, state)(state)
+    actions.get_action(Key.D, state)(state)
 
     coordinates = geomap.get_coordinates(player)
     assert coordinates
     assert set(geomap.get_objects(coordinates)) == {player, helmet}
-    actions.get(Key.E, state)(state)
+    actions.get_action(Key.E, state)(state)
     assert set(inventory.get_treasures()) == {boots, helmet}
     assert geomap.get_objects(coordinates) == (player, )
 
@@ -93,33 +93,33 @@ def test_inventory_actions(state: GameState, actions: ActionManager) -> None:
     helmet, boots = tp.cast(tp.List[Treasure], state.environment.world_objects[2:])
 
     assert inventory.get_additional_stats() == boots.stats
-    actions.get(Key.D, state)(state)
-    actions.get(Key.E, state)(state)
+    actions.get_action(Key.D, state)(state)
+    actions.get_action(Key.E, state)(state)
     assert inventory.get_additional_stats() == boots.stats
 
-    actions.get(Key.II, state)(state)
+    actions.get_action(Key.II, state)(state)
     assert inventory.presenter.get_selected() == boots
 
-    actions.get(Key.E, state)(state)
+    actions.get_action(Key.E, state)(state)
     assert inventory.presenter.get_selected() == boots
     assert inventory.get_additional_stats() == Stats(0.0, 0.0)
 
-    actions.get(Key.W, state)(state)
+    actions.get_action(Key.W, state)(state)
     assert inventory.presenter.get_selected() == boots
-    actions.get(Key.S, state)(state)
+    actions.get_action(Key.S, state)(state)
     assert inventory.presenter.get_selected() == helmet
     assert inventory.get_additional_stats() == Stats(0.0, 0.0)
 
-    actions.get(Key.E, state)(state)
+    actions.get_action(Key.E, state)(state)
     assert inventory.presenter.get_selected() == helmet
     assert inventory.get_additional_stats() == helmet.stats
 
-    actions.get(Key.W, state)(state)
-    actions.get(Key.E, state)(state)
+    actions.get_action(Key.W, state)(state)
+    actions.get_action(Key.E, state)(state)
     assert inventory.presenter.get_selected() == boots
     assert inventory.get_additional_stats() == boots.stats + helmet.stats
 
 
 def test_menu_actions(state: GameState, actions: ActionManager) -> None:
-    actions.get(Key.Q, state)(state)
-    assert state.running is False
+    actions.get_action(Key.Q, state)(state)
+    assert state.is_running is False

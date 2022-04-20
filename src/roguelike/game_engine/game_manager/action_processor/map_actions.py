@@ -12,7 +12,7 @@ def _switch_to_inventory(state: GameState) -> None:
 
 def _get_player_coordinates(state: GameState) -> MapCoordinates:
     coordinates = state.environment.map.get_coordinates(state.player)
-    if not coordinates:
+    if coordinates is None:
         raise RuntimeError("No player on map")
     return coordinates
 
@@ -27,9 +27,8 @@ def _take_treasures(state: GameState) -> None:
 
 
 def _move_item_to(geomap: Map, map_object: MapObject, coordinates: MapCoordinates) -> None:
-    for item in geomap.get_objects(coordinates):
-        if isinstance(item, Obstacle):
-            return
+    if Obstacle() in geomap.get_objects(coordinates):
+        return
     geomap.move_to(map_object, coordinates)
 
 
@@ -65,8 +64,8 @@ class MapActionFactory:
             Key.II: _switch_to_inventory,
         }
 
-    def valid_key(self, key: Key) -> bool:
+    def is_valid_key(self, key: Key) -> bool:
         return key in self.actions
 
-    def get(self, key: Key) -> tp.Callable[[GameState], None]:
+    def get_action(self, key: Key) -> tp.Callable[[GameState], None]:
         return self.actions[key]

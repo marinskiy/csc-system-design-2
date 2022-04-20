@@ -10,7 +10,7 @@ def _switch_to_map(state: GameState) -> None:
 
 def _change_treasure_state(state: GameState) -> None:
     treasure = state.inventory.presenter.get_selected()
-    if treasure:
+    if treasure is not None:
         state.inventory.change_treasure_state(treasure)
 
 
@@ -32,8 +32,8 @@ class InventoryActionFactory:
             Key.M: _switch_to_map,
         }
 
-    def valid_key(self, key: Key) -> bool:
+    def is_valid_key(self, key: Key) -> bool:
         return key in self.actions
 
-    def get(self, key: Key) -> tp.Callable[[GameState], None]:
+    def get_action(self, key: Key) -> tp.Callable[[GameState], None]:
         return self.actions[key]

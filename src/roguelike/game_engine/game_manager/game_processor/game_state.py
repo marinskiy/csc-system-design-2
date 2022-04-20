@@ -46,4 +46,4 @@ class GameState:
         self.environment = environment
         self.inventory = inventory
         self.player = player
-        self.running = True
+        self.is_running = True

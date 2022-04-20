@@ -5,7 +5,7 @@ from roguelike.game_engine.game_manager.game_processor.game_state import GameSta
 
 
 def _exit(state: GameState) -> None:
-    state.running = False
+    state.is_running = False
 
 
 class MenuActionFactory:
@@ -13,8 +13,8 @@ class MenuActionFactory:
     def __init__(self) -> None:
         self._special_keys = {Key.Q}
 
-    def valid_key(self, key: Key) -> bool:
+    def is_valid_key(self, key: Key) -> bool:
         return key in self._special_keys
 
-    def get(self, _: Key) -> tp.Callable[[GameState], None]:
+    def get_action(self, _: Key) -> tp.Callable[[GameState], None]:
         return _exit
