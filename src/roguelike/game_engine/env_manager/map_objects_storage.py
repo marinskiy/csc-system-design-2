@@ -14,13 +14,7 @@ class MapObject:
 
 
 class Obstacle(MapObject):
-    def __eq__(self, other: tp.Any) -> bool:
-        if isinstance(other, Obstacle):
-            return True
-        return False
-
-    def __hash__(self) -> int:
-        return hash(Obstacle)
+    pass
 
 
 @dataclass

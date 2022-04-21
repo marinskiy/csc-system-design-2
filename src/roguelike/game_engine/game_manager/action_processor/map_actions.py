@@ -27,8 +27,9 @@ def _take_treasures(state: GameState) -> None:
 
 
 def _move_item_to(geomap: Map, map_object: MapObject, coordinates: MapCoordinates) -> None:
-    if Obstacle() in geomap.get_objects(coordinates):
-        return
+    for item in geomap.get_objects(coordinates):
+        if isinstance(item, Obstacle):
+            return
     geomap.move_to(map_object, coordinates)
 
 
