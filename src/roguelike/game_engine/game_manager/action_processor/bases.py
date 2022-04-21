@@ -1,7 +1,7 @@
 """Contains Action and ActionFactory interfaces"""
 from abc import abstractmethod
 
-from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Key
+from ..game_processor.game_state import GameState, Key
 
 
 class BaseAction:

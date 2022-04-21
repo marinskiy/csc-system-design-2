@@ -1,8 +1,8 @@
 """
 Contains all classes run game loop
 """
-from roguelike.game_engine.game_manager.action_processor.actions import ActionManager
-from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Key
+from ..action_processor.action_manager import ActionManager
+from .game_state import GameState, Key
 
 
 class GameLoop:

@@ -9,6 +9,9 @@ from dataclasses import dataclass
 import typing as tp
 
 
+__all__ = ['MapObject', 'Treasure', 'Obstacle', 'PlayerCharacter']
+
+
 class MapObject:
     pass
 
@@ -54,6 +57,3 @@ class Treasure(MapObject):
     @property
     def name(self) -> str:
         return self._name
-
-
-__all__ = [MapObject, Treasure, Obstacle]

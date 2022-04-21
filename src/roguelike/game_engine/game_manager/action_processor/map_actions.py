@@ -1,9 +1,8 @@
 """Contains functions performing map actions and their factory"""
 
-from roguelike.game_engine.env_manager import Map, MapCoordinates, MapObject
-from roguelike.game_engine.env_manager.map_objects_storage import Treasure, Obstacle
-from roguelike.game_engine.game_manager.action_processor.bases import BaseAction, BaseActionFactory
-from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Key, Mode
+from roguelike.game_engine.env_manager import Map, MapCoordinates, MapObject, map_objects_storage
+from .bases import BaseAction, BaseActionFactory
+from ..game_processor.game_state import GameState, Key, Mode
 
 
 class SwitchToInventoryAction(BaseAction):
@@ -25,14 +24,14 @@ class TakeTreasuresAction(BaseAction):
         coordinates = _get_player_coordinates(state)
         items = state.environment.map.get_objects(coordinates)
         for item in items:
-            if isinstance(item, Treasure):
+            if isinstance(item, map_objects_storage.Treasure):
                 state.environment.map.remove_object(item)
                 state.inventory.add_treasure(item)
 
 
 def _move_item_to(geomap: Map, map_object: MapObject, coordinates: MapCoordinates) -> None:
     for item in geomap.get_objects(coordinates):
-        if isinstance(item, Obstacle):
+        if isinstance(item, map_objects_storage.Obstacle):
             return
     geomap.move_to(map_object, coordinates)
 

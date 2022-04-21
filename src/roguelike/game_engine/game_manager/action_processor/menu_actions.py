@@ -1,7 +1,7 @@
 """Contains functions performing menu actions and their factory"""
 
-from roguelike.game_engine.game_manager.action_processor.bases import BaseAction, BaseActionFactory
-from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Key
+from .bases import BaseAction, BaseActionFactory
+from ..game_processor.game_state import GameState, Key
 
 
 class ExitAction(BaseAction):

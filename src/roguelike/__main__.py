@@ -4,8 +4,7 @@ Contains game main loop
 
 import os
 
-from roguelike.game_engine.game_manager.game_constructor import GameLoader
-from roguelike.game_engine.game_manager.game_processor.game_loop import GameLoop
+from roguelike.game_engine.game_manager import GameLoop, GameLoader
 from roguelike.ui.keyboard_interpreter import KeyboardInterpreter
 
 DEFAULT_MAP = 'assets/maps/forest.json'

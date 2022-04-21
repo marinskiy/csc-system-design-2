@@ -4,7 +4,7 @@ from .bases import BaseAction
 from .inventory_actions import InventoryActionFactory
 from .map_actions import MapActionFactory
 from .menu_actions import MenuActionFactory
-from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Key, Mode
+from ..game_processor.game_state import GameState, Key, Mode
 
 
 class NoAction(BaseAction):

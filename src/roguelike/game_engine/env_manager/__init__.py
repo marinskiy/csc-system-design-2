@@ -1,3 +1,4 @@
+# pylint: disable=missing-module-docstring
 from . import map_objects_storage
 from .env_manager import Environment, Inventory, InventoryPresenter
 from .map import Map, MapCoordinates
