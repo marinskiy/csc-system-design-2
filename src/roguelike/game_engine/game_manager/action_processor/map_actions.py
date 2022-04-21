@@ -1,13 +1,15 @@
 """Contains functions performing map actions and their factory"""
-import typing as tp
 
-from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Key, Mode
+from roguelike.game_engine.env_manager import Map, MapCoordinates, MapObject
 from roguelike.game_engine.env_manager.map_objects_storage import Treasure, Obstacle
-from roguelike.game_engine.env_manager.map import Map, MapCoordinates, MapObject
+from roguelike.game_engine.game_manager.action_processor.bases import BaseAction, BaseActionFactory
+from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Key, Mode
 
 
-def _switch_to_inventory(state: GameState) -> None:
-    state.mode = Mode.INVENTORY
+class SwitchToInventoryAction(BaseAction):
+    @staticmethod
+    def __call__(state: GameState) -> None:
+        state.mode = Mode.INVENTORY
 
 
 def _get_player_coordinates(state: GameState) -> MapCoordinates:
@@ -17,13 +19,15 @@ def _get_player_coordinates(state: GameState) -> MapCoordinates:
     return coordinates
 
 
-def _take_treasures(state: GameState) -> None:
-    coordinates = _get_player_coordinates(state)
-    items = state.environment.map.get_objects(coordinates)
-    for item in items:
-        if isinstance(item, Treasure):
-            state.environment.map.remove_object(item)
-            state.inventory.add_treasure(item)
+class TakeTreasuresAction(BaseAction):
+    @staticmethod
+    def __call__(state: GameState) -> None:
+        coordinates = _get_player_coordinates(state)
+        items = state.environment.map.get_objects(coordinates)
+        for item in items:
+            if isinstance(item, Treasure):
+                state.environment.map.remove_object(item)
+                state.inventory.add_treasure(item)
 
 
 def _move_item_to(geomap: Map, map_object: MapObject, coordinates: MapCoordinates) -> None:
@@ -33,40 +37,49 @@ def _move_item_to(geomap: Map, map_object: MapObject, coordinates: MapCoordinate
     geomap.move_to(map_object, coordinates)
 
 
-def _move_right(state: GameState) -> None:
-    coordinates = _get_player_coordinates(state)
-    _move_item_to(state.environment.map, state.player, MapCoordinates(coordinates.x + 1, coordinates.y))
+class MoveRightAction(BaseAction):
+    @staticmethod
+    def __call__(state: GameState) -> None:
+        coordinates = _get_player_coordinates(state)
+        _move_item_to(state.environment.map, state.player, MapCoordinates(coordinates.x + 1, coordinates.y))
 
 
-def _move_left(state: GameState) -> None:
-    coordinates = _get_player_coordinates(state)
-    _move_item_to(state.environment.map, state.player, MapCoordinates(coordinates.x - 1, coordinates.y))
+class MoveLeftAction(BaseAction):
+    @staticmethod
+    def __call__(state: GameState) -> None:
+        coordinates = _get_player_coordinates(state)
+        _move_item_to(state.environment.map, state.player, MapCoordinates(coordinates.x - 1, coordinates.y))
 
 
-def _move_up(state: GameState) -> None:
-    coordinates = _get_player_coordinates(state)
-    _move_item_to(state.environment.map, state.player, MapCoordinates(coordinates.x, coordinates.y - 1))
+class MoveUpAction(BaseAction):
+    @staticmethod
+    def __call__(state: GameState) -> None:
+        coordinates = _get_player_coordinates(state)
+        _move_item_to(state.environment.map, state.player, MapCoordinates(coordinates.x, coordinates.y - 1))
 
 
-def _move_down(state: GameState) -> None:
-    coordinates = _get_player_coordinates(state)
-    _move_item_to(state.environment.map, state.player, MapCoordinates(coordinates.x, coordinates.y + 1))
+class MoveDownAction(BaseAction):
+    @staticmethod
+    def __call__(state: GameState) -> None:
+        coordinates = _get_player_coordinates(state)
+        _move_item_to(state.environment.map, state.player, MapCoordinates(coordinates.x, coordinates.y + 1))
 
 
-class MapActionFactory:
+class MapActionFactory(BaseActionFactory):
     """Produces actions in map mode"""
+
     def __init__(self) -> None:
-        self.actions = {
-            Key.D: _move_right,
-            Key.A: _move_left,
-            Key.W: _move_up,
-            Key.S: _move_down,
-            Key.E: _take_treasures,
-            Key.II: _switch_to_inventory,
+        self._actions = {
+            Key.D: MoveRightAction(),
+            Key.A: MoveLeftAction(),
+            Key.W: MoveUpAction(),
+            Key.S: MoveDownAction(),
+            Key.E: TakeTreasuresAction(),
+            Key.II: SwitchToInventoryAction(),
         }
 
     def is_valid_key(self, key: Key) -> bool:
-        return key in self.actions
+        return key in self._actions
 
-    def get_action(self, key: Key) -> tp.Callable[[GameState], None]:
-        return self.actions[key]
+    def get_action(self, key: Key) -> BaseAction:
+        return self._actions[key]

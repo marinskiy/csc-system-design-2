@@ -5,8 +5,7 @@ import typing as tp
 
 import pytest
 
-from roguelike.game_engine.env_manager.env_manager import Inventory, Environment
-from roguelike.game_engine.env_manager.map import Map, MapCoordinates
+from roguelike.game_engine.env_manager import Inventory, Environment, Map, MapCoordinates
 from roguelike.game_engine.env_manager.map_objects_storage import (
     Stats, PlayerCharacter, Obstacle, Treasure,
 )

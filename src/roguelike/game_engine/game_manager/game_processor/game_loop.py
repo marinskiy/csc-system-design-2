@@ -12,5 +12,5 @@ class GameLoop:
         self._action_manager = ActionManager()
 
     def run_game_turn(self, key: Key) -> GameState:
-        self._action_manager.get(key, self._state)(self._state)
+        self._action_manager.get_action(key, self._state)(self._state)
         return self._state

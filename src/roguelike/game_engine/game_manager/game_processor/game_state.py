@@ -5,8 +5,7 @@ It stores all information about game: current view mode, environment, player and
 
 from enum import Enum, auto
 
-from roguelike.game_engine.env_manager.env_manager import Environment, Inventory
-from roguelike.game_engine.env_manager.map_objects_storage import PlayerCharacter
+from roguelike.game_engine.env_manager import Environment, Inventory, map_objects_storage
 
 
 class Key(Enum):
@@ -40,7 +39,7 @@ class GameState:
             mode: Mode,
             environment: Environment,
             inventory: Inventory,
-            player: PlayerCharacter,
+            player: map_objects_storage.PlayerCharacter,
     ) -> None:
         self.mode = mode
         self.environment = environment

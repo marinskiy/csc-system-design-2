@@ -54,3 +54,6 @@ class Treasure(MapObject):
     @property
     def name(self) -> str:
         return self._name
+
+
+__all__ = [MapObject, Treasure, Obstacle]

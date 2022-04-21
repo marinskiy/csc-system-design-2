@@ -5,9 +5,8 @@ Contains all classes needed to load game
 import json
 import typing as tp
 
-from roguelike.game_engine.env_manager.env_manager import Environment, Inventory
-from roguelike.game_engine.env_manager.map import MapCoordinates, Map
-from roguelike.game_engine.env_manager.map_objects_storage import Stats, Obstacle, Treasure, PlayerCharacter, MapObject
+from roguelike.game_engine.env_manager import MapCoordinates, Map, Environment, Inventory, Stats, MapObject
+from roguelike.game_engine.env_manager.map_objects_storage import Obstacle, Treasure, PlayerCharacter
 from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Mode
 
 

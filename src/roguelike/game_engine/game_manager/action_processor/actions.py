@@ -1,14 +1,16 @@
 """Contains main class for generation and performance of game actions"""
-import typing as tp
 
+from .bases import BaseAction
+from .inventory_actions import InventoryActionFactory
+from .map_actions import MapActionFactory
+from .menu_actions import MenuActionFactory
 from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Key, Mode
-from roguelike.game_engine.game_manager.action_processor.map_actions import MapActionFactory
-from roguelike.game_engine.game_manager.action_processor.inventory_actions import InventoryActionFactory
-from roguelike.game_engine.game_manager.action_processor.menu_actions import MenuActionFactory
 
 
-def _no_action(_: GameState) -> None:
-    pass
+class NoAction(BaseAction):
+    @staticmethod
+    def __call__(game_state: GameState) -> None:
+        pass
 
 
 class ActionManager:
@@ -18,11 +20,11 @@ class ActionManager:
         self._inventory_factory = InventoryActionFactory()
         self._menu_factory = MenuActionFactory()
 
-    def get_action(self, key: Key, state: GameState) -> tp.Callable[[GameState], None]:
+    def get_action(self, key: Key, state: GameState) -> BaseAction:
         if self._menu_factory.is_valid_key(key):
             return self._menu_factory.get_action(key)
         if state.mode == Mode.MAP and self._map_factory.is_valid_key(key):
             return self._map_factory.get_action(key)
         elif state.mode == Mode.INVENTORY and self._inventory_factory.is_valid_key(key):
             return self._inventory_factory.get_action(key)
-        return _no_action
+        return NoAction()

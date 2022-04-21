@@ -4,7 +4,7 @@ import typing as tp
 from dataclasses import dataclass
 from itertools import product
 
-from roguelike.game_engine.env_manager.map_objects_storage import MapObject
+from .map_objects_storage import MapObject
 
 
 @dataclass

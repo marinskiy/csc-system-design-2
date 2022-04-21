@@ -4,9 +4,9 @@ import os
 
 import pytest
 
-from roguelike.game_engine.env_manager.map import MapCoordinates
+from roguelike.game_engine.env_manager import MapCoordinates
 from roguelike.game_engine.env_manager.map_objects_storage import Stats, Obstacle, Treasure, PlayerCharacter
-from roguelike.game_engine.game_manager.game_constructor.game_loader import GameLoader
+from roguelike.game_engine.game_manager.game_constructor import GameLoader
 
 
 def test_coordinates_load_correctly() -> None:
@@ -31,7 +31,7 @@ def test_stats_load_correctly() -> None:
 
 
 def test_obstacle_load_correctly() -> None:
-    assert GameLoader._load_obstacle({}) == Obstacle()  # pylint: disable=W0212
+    assert isinstance(GameLoader._load_obstacle({}), Obstacle)  # pylint: disable=W0212
 
     with pytest.raises(ValueError):
         GameLoader._load_obstacle({"health": 100.0, "attack": 100.0, "defence": 100.0})  # pylint: disable=W0212
@@ -94,8 +94,13 @@ def test_load_from_file() -> None:
 
     assert state.player.stats == Stats(100.0, 100.0)
 
-    assert isinstance(list(state.environment.map.get_objects(MapCoordinates(0, 0)))[0], Obstacle)
-    assert isinstance(list(state.environment.map.get_objects(MapCoordinates(7, 7)))[0], Obstacle)
-    assert isinstance(list(state.environment.map.get_objects(MapCoordinates(20, 20)))[0], Treasure)
-    assert isinstance(list(state.environment.map.get_objects(MapCoordinates(0, 20)))[0], Treasure)
-    assert isinstance(list(state.environment.map.get_objects(MapCoordinates(10, 10)))[0], PlayerCharacter)
+    assert isinstance(list(state.environment.map.get_objects(MapCoordinates(0, 0)))[0],
+                      Obstacle)
+    assert isinstance(list(state.environment.map.get_objects(MapCoordinates(7, 7)))[0],
+                      Obstacle)
+    assert isinstance(list(state.environment.map.get_objects(MapCoordinates(20, 20)))[0],
+                      Treasure)
+    assert isinstance(list(state.environment.map.get_objects(MapCoordinates(0, 20)))[0],
+                      Treasure)
+    assert isinstance(list(state.environment.map.get_objects(MapCoordinates(10, 10)))[0],
+                      PlayerCharacter)
