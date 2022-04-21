@@ -8,3 +8,4 @@ dependencies:
   - flake8=3.9.2
   - pytest=6.2.5
   - pylint=2.12.2
+  - pynput=1.7.3
