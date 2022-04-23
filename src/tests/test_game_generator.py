@@ -2,6 +2,7 @@
 
 import pytest
 
+from roguelike.game_engine.env_manager.map import MapCoordinates
 from roguelike.game_engine.env_manager.map_objects_storage import Obstacle
 from roguelike.game_engine.game_manager.game_constructor.game_generator import GameGenerator, StatsGenerator, \
     PlayerCharacterGenerator, get_random_value_from_range, ObstacleGenerator, TreasureGenerator, MapObjectGenerator, \
@@ -108,5 +109,16 @@ def test_wheel() -> None:
 def test_map_generated_correctly() -> None:
     test_map = MapGenerator({"width": [30, 100], "height": [1, 10]}).generate()
 
-    assert 30 <= test_map._width <= 100  # pylint: disable=W0212+
-    assert 1 <= test_map._height <= 10  # pylint: disable=W0212+
+    assert 30 <= test_map.get_width() <= 100
+    assert 1 <= test_map.get_height() <= 10
+
+
+def test_game_state_generated_correctly() -> None:
+    state = GameGenerator().generate()
+
+    assert 30 <= state.environment.map.get_width() <= 100
+    assert 30 <= state.environment.map.get_height() <= 100
+
+    for i in range(state.environment.map.get_width()):
+        for j in range(state.environment.map.get_height()):
+            assert len(state.environment.map.get_objects(MapCoordinates(i, j))) <= 1

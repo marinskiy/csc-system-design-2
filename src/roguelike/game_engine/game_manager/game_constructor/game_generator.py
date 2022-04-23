@@ -4,10 +4,17 @@ Contains all classes needed to generate game
 
 import typing as tp
 import random
+import os
+import json
 
-from roguelike.game_engine.env_manager.map import Map
+from roguelike.game_engine.env_manager.env_manager import Environment, Inventory
+from roguelike.game_engine.env_manager.map import Map, MapCoordinates
 from roguelike.game_engine.game_manager.game_constructor.game_loader import check_dict_fields
 from roguelike.game_engine.env_manager.map_objects_storage import Stats, PlayerCharacter, Obstacle, Treasure, MapObject
+from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Mode
+
+
+DEFAULT_GAME_SETTINGS_FILE = os.path.join(os.path.dirname(__file__), "../../../../assets/default_game.json")
 
 
 def get_random_value_from_range(value: tp.List[tp.Union[int, float]]) -> int:
@@ -151,3 +158,42 @@ class MapGenerator:
 class GameGenerator:
     """Generates GameState based on default settings"""
 
+    def __init__(self) -> None:
+        settings = self._load_settings()
+        self.map_generator = MapGenerator(settings["map"])
+        self.object_generator = MapObjectGenerator(settings["world_objects"])
+        self.wheel = MapObjectWheel(settings["wheel"])
+
+    @staticmethod
+    def _validate_settings(settings: tp.Dict[str, tp.Any]) -> None:
+        if not check_dict_fields(settings, ["map", "world_objects", "wheel"]):
+            raise ValueError("Invalid default game json")
+
+    def _load_settings(self) -> tp.Dict[str, tp.Any]:
+        settings = {}
+        with open(DEFAULT_GAME_SETTINGS_FILE, encoding="utf-8") as json_file:
+            settings = json.load(json_file)
+        self._validate_settings(settings)
+        return settings
+
+    def generate(self) -> GameState:
+        world_objects = []
+        geomap = self.map_generator.generate()
+
+        player = self.object_generator.generate("player")
+        world_objects.append(player)
+        player_coordinates = MapCoordinates(get_random_value_from_range([0, geomap.get_width() - 1]),
+                                            get_random_value_from_range([0, geomap.get_height() - 1]))
+        geomap.add_object(player_coordinates, player)
+
+        for i in range(geomap.get_width()):
+            for j in range(geomap.get_height()):
+                if len(geomap.get_objects(MapCoordinates(i, j))) == 0:
+                    new_object_type = self.wheel.get_next_object_type()
+                    if new_object_type == "none":
+                        continue
+                    new_object = self.object_generator.generate(new_object_type)
+                    geomap.add_object(MapCoordinates(i, j), new_object)
+                    world_objects.append(new_object)
+
+        return GameState(Mode.MAP, Environment(geomap, world_objects), Inventory([]), player)
