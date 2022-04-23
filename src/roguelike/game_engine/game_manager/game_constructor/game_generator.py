@@ -13,16 +13,18 @@ from roguelike.game_engine.game_manager.game_constructor.game_loader import chec
 from roguelike.game_engine.env_manager.map_objects_storage import Stats, PlayerCharacter, Obstacle, Treasure, MapObject
 from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Mode
 
-
 DEFAULT_GAME_SETTINGS_FILE = os.path.join(os.path.dirname(__file__), "../../../../assets/default_game.json")
 
 
-def get_random_value_from_range(value: tp.List[tp.Union[int, float]]) -> int:
+def get_random_int_from_range(value: tp.List[tp.Union[int]]) -> int:
     if len(value) != 2 or value[0] > value[1]:
         raise ValueError("Invalid value range")
+    return random.randint(value[0], value[1])
 
-    if isinstance(value[0], int):
-        return random.randint(value[0], value[1])
+
+def get_random_float_from_range(value: tp.List[float]) -> float:
+    if len(value) != 2 or value[0] > value[1]:
+        raise ValueError("Invalid value range")
     return random.uniform(value[0], value[1])
 
 
@@ -40,8 +42,8 @@ class StatsGenerator:
             raise ValueError("Invalid stats settings json")
 
     def generate(self) -> Stats:
-        health = get_random_value_from_range(self.health_range)
-        attack = get_random_value_from_range(self.attack_range)
+        health = get_random_float_from_range(self.health_range)
+        attack = get_random_float_from_range(self.attack_range)
         return Stats(health, attack)
 
 
@@ -145,8 +147,8 @@ class MapGenerator:
         self.height_range = settings["height"]
 
     def generate(self) -> Map:
-        width = get_random_value_from_range(self.width_range)
-        height = get_random_value_from_range(self.height_range)
+        width = get_random_int_from_range(self.width_range)
+        height = get_random_int_from_range(self.height_range)
         return Map(width, height)
 
     @staticmethod
@@ -177,13 +179,13 @@ class GameGenerator:
         return settings
 
     def generate(self) -> GameState:
-        world_objects = []
+        world_objects: tp.List[MapObject] = []
         geomap = self.map_generator.generate()
 
         player = self.object_generator.generate("player")
         world_objects.append(player)
-        player_coordinates = MapCoordinates(get_random_value_from_range([0, geomap.get_width() - 1]),
-                                            get_random_value_from_range([0, geomap.get_height() - 1]))
+        player_coordinates = MapCoordinates(get_random_int_from_range([0, geomap.get_width() - 1]),
+                                            get_random_int_from_range([0, geomap.get_height() - 1]))
         geomap.add_object(player_coordinates, player)
 
         for i in range(geomap.get_width()):

@@ -97,4 +97,3 @@ class Map:
 
     def get_height(self) -> int:
         return self._height
-
