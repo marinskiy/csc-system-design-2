@@ -1,4 +1,4 @@
-"""Env loader tests"""
+"""Game loader tests"""
 
 import os
 
