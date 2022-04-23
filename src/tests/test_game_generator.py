@@ -5,24 +5,24 @@ import pytest
 from roguelike.game_engine.env_manager.map import MapCoordinates
 from roguelike.game_engine.env_manager.map_objects_storage import Obstacle
 from roguelike.game_engine.game_manager.game_constructor.game_generator import GameGenerator, StatsGenerator, \
-    PlayerCharacterGenerator, get_random_value_from_range, ObstacleGenerator, TreasureGenerator, MapObjectGenerator, \
-    MapObjectWheel, MapGenerator
+    PlayerCharacterGenerator, ObstacleGenerator, TreasureGenerator, MapObjectGenerator, \
+    MapObjectWheel, MapGenerator, get_random_int_from_range, get_random_float_from_range
 
 
 def test_random_value_from_range() -> None:
-    test_value = get_random_value_from_range([0, 100])
+    test_value = get_random_int_from_range([0, 100])
     assert 0 <= test_value <= 100
 
-    test_value = get_random_value_from_range([0.1, 0.5])
+    test_value = get_random_float_from_range([0.1, 0.5])
     assert 0.1 <= test_value <= 0.5
 
-    test_value = get_random_value_from_range([0, 0])
+    test_value = get_random_int_from_range([0, 0])
     assert test_value == 0
 
     with pytest.raises(ValueError):
-        get_random_value_from_range([100, 0])
+        get_random_int_from_range([100, 0])
     with pytest.raises(ValueError):
-        get_random_value_from_range([0.5, 0.1])
+        get_random_float_from_range([0.5, 0.1])
 
 
 def test_stats_generated_correctly() -> None:

@@ -101,3 +101,9 @@ class Map:
         if not self._is_on_the_map(map_object):
             return None
         return self._map_object_to_coord[map_object]
+
+    def get_width(self) -> int:
+        return self._width
+
+    def get_height(self) -> int:
+        return self._height
