@@ -58,6 +58,17 @@ def test_treasure_creates_properly() -> None:
     assert treasure.stats == Stats(0, 1)
 
 
+def test_coordinates_neighbours() -> None:
+    coordinates = MapCoordinates(0, 0)
+    assert coordinates.up == MapCoordinates(0, -1)
+    assert coordinates.down == MapCoordinates(0, 1)
+    assert coordinates.left == MapCoordinates(-1, 0)
+    assert coordinates.right == MapCoordinates(1, 0)
+    assert coordinates.get_neighbours() == [
+        MapCoordinates(-1, 0), MapCoordinates(1, 0),
+        MapCoordinates(0, -1), MapCoordinates(0, 1)]
+
+
 def test_map_creates_correctly() -> None:
     with pytest.raises(ValueError):
         Map(0, 0)
@@ -247,7 +258,7 @@ def test_inventory_calculates_additional_stats_correctly(
 
 
 def test_environment_creates_properly() -> None:
-    Environment(map=Map(1, 1), world_objects=[])
+    Environment(map=Map(1, 1), world_objects=[], enemies=set())
 
 
 def test_player_character_creates_properly() -> None:
@@ -258,7 +269,7 @@ def test_player_character_creates_properly() -> None:
 def test_game_state_creates_properly() -> None:
     GameState(
         mode=Mode.MAP,
-        environment=Environment(Map(1, 1), []),
+        environment=Environment(Map(1, 1), [], set()),
         inventory=Inventory([]),
         player=PlayerCharacter(Stats(1, 0)),
     )

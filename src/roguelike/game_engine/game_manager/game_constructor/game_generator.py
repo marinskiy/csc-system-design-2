@@ -195,4 +195,4 @@ class GameGenerator:
                     geomap.add_object(MapCoordinates(i, j), new_object)
                     world_objects.append(new_object)
 
-        return GameState(Mode.MAP, Environment(geomap, world_objects), Inventory([]), player)
+        return GameState(Mode.MAP, Environment(geomap, world_objects, set()), Inventory([]), player)

@@ -3,7 +3,7 @@
 import typing as tp
 from random import randrange
 
-from ....game_engine.env_manager import Map, MapCoordinates, MapObject, map_objects_storage
+from ....game_engine.env_manager import Map, MapCoordinates, MapObject, map_objects_storage, Environment
 from ....game_engine.env_manager.enemies import NPC, ConfusedMob
 from .bases import BaseAction, BaseActionFactory
 from ..game_processor.game_state import GameState, Key, Mode
@@ -41,56 +41,77 @@ def _get_blocking_object(geomap: Map, coordinates: MapCoordinates) -> tp.Optiona
 
 
 def _attack_creature(
-        geomap: Map, player: map_objects_storage.PlayerCharacter, npc: NPC, coordinates: MapCoordinates) -> None:
+        environment: Environment, player: map_objects_storage.PlayerCharacter,
+        npc: NPC, coordinates: MapCoordinates) -> None:
     critical_hit = randrange(10)
     if critical_hit == 0:
         npc.take_damage(2 * player.attack_power)
     else:
         npc.take_damage(player.attack_power)
 
+    if npc.is_dead():
+        environment.map.remove_object(npc)
+        environment.enemies.remove(npc)
+
+        player.gain_experience(npc.level)
+        return
+
     if critical_hit == 1:
-        confused = ConfusedMob(npc, 5)
-        geomap.remove_object(npc)
-        geomap.add_object(coordinates, confused)
+        def callback() -> None:
+            coordinates = environment.map.get_coordinates(confused)
+            if coordinates is None:
+                raise RuntimeError
+            environment.map.remove_object(confused)
+            environment.enemies.remove(confused)
+            environment.map.add_object(coordinates, npc)
+            environment.enemies.add(npc)
+
+        confused = ConfusedMob(npc, 3, callback)
+        environment.map.remove_object(npc)
+        environment.enemies.remove(npc)
+        environment.map.add_object(coordinates, confused)
+        environment.enemies.add(confused)
 
 
-def _move_player_to(geomap: Map, player: map_objects_storage.PlayerCharacter, coordinates: MapCoordinates) -> None:
-    block = _get_blocking_object(geomap, coordinates)
+def _move_player_to(environment: Environment,
+                    player: map_objects_storage.PlayerCharacter,
+                    coordinates: MapCoordinates) -> None:
+    block = _get_blocking_object(environment.map, coordinates)
     if isinstance(block, map_objects_storage.Obstacle):
         return
     if isinstance(block, NPC):
-        _attack_creature(geomap, player, block, coordinates)
+        _attack_creature(environment, player, block, coordinates)
         return
 
-    geomap.move_to(player, coordinates)
+    environment.map.move_to(player, coordinates)
 
 
 class MoveRightAction(BaseAction):
     @staticmethod
     def __call__(state: GameState) -> None:
         coordinates = _get_player_coordinates(state)
-        _move_player_to(state.environment.map, state.player, coordinates.right)
+        _move_player_to(state.environment, state.player, coordinates.right)
 
 
 class MoveLeftAction(BaseAction):
     @staticmethod
     def __call__(state: GameState) -> None:
         coordinates = _get_player_coordinates(state)
-        _move_player_to(state.environment.map, state.player, coordinates.left)
+        _move_player_to(state.environment, state.player, coordinates.left)
 
 
 class MoveUpAction(BaseAction):
     @staticmethod
     def __call__(state: GameState) -> None:
         coordinates = _get_player_coordinates(state)
-        _move_player_to(state.environment.map, state.player, coordinates.up)
+        _move_player_to(state.environment, state.player, coordinates.up)
 
 
 class MoveDownAction(BaseAction):
     @staticmethod
     def __call__(state: GameState) -> None:
         coordinates = _get_player_coordinates(state)
-        _move_player_to(state.environment.map, state.player, coordinates.down)
+        _move_player_to(state.environment, state.player, coordinates.down)
 
 
 class MapActionFactory(BaseActionFactory):

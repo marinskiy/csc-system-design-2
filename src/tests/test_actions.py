@@ -1,11 +1,12 @@
 """Action manager tests"""
-
+import random
 import typing as tp
 
 import pytest
 
 from roguelike.game_engine.env_manager import Map, MapCoordinates, Stats
 from roguelike.game_engine.env_manager.map_objects_storage import Treasure, Obstacle, PlayerCharacter
+from roguelike.game_engine.env_manager.enemies import Mob, ConfusedMob, Behaviour
 from roguelike.game_engine.game_manager.action_processor.action_manager import ActionManager
 from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Key, Mode, Environment, Inventory
 
@@ -22,7 +23,9 @@ def generate_state() -> GameState:
     item = Treasure("Trashy boots", Stats(0, -2))
     inventory = Inventory([item])
     inventory.change_treasure_state(item)
-    return GameState(Mode.MAP, Environment(geomap, [player, obstacle, treasure, item]), inventory, player)
+    enemy = Mob(3, Stats(7, 1), 3, Behaviour())
+    geomap.add_object(MapCoordinates(0, 0), enemy)
+    return GameState(Mode.MAP, Environment(geomap, [player, obstacle, treasure, item], {enemy}), inventory, player)
 
 
 @pytest.fixture(name="actions")
@@ -65,6 +68,45 @@ def test_move_player(state: GameState, actions: ActionManager) -> None:
 
     actions.get_action(Key.A, state)(state)
     assert geomap.get_coordinates(player) == MapCoordinates(1, 1)
+
+
+def test_player_attack(state: GameState, actions: ActionManager) -> None:
+    random.seed(2)
+    geomap = state.environment.map
+    player = state.player
+    enemy = next(iter(state.environment.enemies))
+
+    assert geomap.get_coordinates(player) == MapCoordinates(1, 1)
+
+    actions.get_action(Key.W, state)(state)
+    assert geomap.get_coordinates(player) == MapCoordinates(1, 0)
+
+    actions.get_action(Key.A, state)(state)
+    assert geomap.get_coordinates(player) == MapCoordinates(1, 0)
+    assert enemy.stats == Stats(3, 1)
+    assert not enemy.is_dead()
+
+    actions.get_action(Key.A, state)(state)
+    assert geomap.get_coordinates(player) == MapCoordinates(1, 0)
+    assert enemy.stats == Stats(1, 1)
+    new_enemies = geomap.get_objects(MapCoordinates(0, 0))
+    assert len(new_enemies) == 1
+    for new_enemy in new_enemies:
+        assert isinstance(new_enemy, ConfusedMob)
+        for _ in range(2):
+            new_enemy.act(geomap, player)
+        assert isinstance(new_enemy, ConfusedMob)
+        new_enemy.act(geomap, player)
+
+    assert (enemy, ) == geomap.get_objects(MapCoordinates(0, 0))
+    assert not enemy.is_dead()
+
+    actions.get_action(Key.A, state)(state)
+    assert geomap.get_coordinates(player) == MapCoordinates(1, 0)
+    assert enemy.is_dead()
+
+    actions.get_action(Key.A, state)(state)
+    assert geomap.get_coordinates(player) == MapCoordinates(0, 0)
 
 
 def test_take_treasure(state: GameState, actions: ActionManager) -> None:
@@ -123,3 +165,17 @@ def test_inventory_actions(state: GameState, actions: ActionManager) -> None:
 def test_menu_actions(state: GameState, actions: ActionManager) -> None:
     actions.get_action(Key.Q, state)(state)
     assert state.is_running is False
+
+
+def test_confusion() -> None:
+    random.seed(5)
+    normal = Mob(1, Stats(2, 2), 1, Behaviour())
+    confused = ConfusedMob(normal, 5, lambda: None)
+    geomap = Map(10, 10)
+    geomap.add_object(MapCoordinates(5, 5), confused)
+    player = PlayerCharacter(Stats(2, 0))
+    coordinates = [
+        MapCoordinates(5, 4), MapCoordinates(5, 3), MapCoordinates(4, 3), MapCoordinates(4, 4), MapCoordinates(5, 4)]
+    for c in coordinates:
+        confused.act(geomap, player)
+        assert c == geomap.get_coordinates(confused)
