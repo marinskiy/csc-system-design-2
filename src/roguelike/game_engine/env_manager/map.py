@@ -4,7 +4,10 @@ import typing as tp
 from dataclasses import dataclass
 from itertools import product
 
-from .map_objects_storage import MapObject
+from PIL import Image
+
+from roguelike.game_engine.env_manager.map_objects_storage import MapObject
+from roguelike.ui.drawable import Drawable
 
 
 @dataclass
@@ -40,7 +43,7 @@ class MapCell:
         return tuple(self._items)
 
 
-class Map:
+class Map(Drawable):
     """Container for interacting with objects on the map"""
 
     def __init__(self, map_width: int, map_height: int) -> None:
@@ -101,6 +104,27 @@ class Map:
         if not self._is_on_the_map(map_object):
             return None
         return self._map_object_to_coord[map_object]
+
+    def get_dimensions(self) -> tp.Tuple[int, int]:
+        return self._width, self._height
+
+    def _draw_map_cell(self, coordinates: MapCoordinates, size: int) -> Image:
+        objs = list(self.get_objects(coordinates))
+        if objs:
+            return objs[-1].draw(size, size)
+        return Image.new('RGB', (size, size), color='green')
+
+    def draw(self, width: int, height: int) -> Image:
+        cell_size = width // self._width
+        assert width % self._width == height % self._height
+        assert width // self._width == height // self._height
+        map_image = Image.new('RGB', (width, height))
+        for i in range(self._width):
+            for j in range(self._height):
+                map_coordinates = MapCoordinates(i, j)
+                map_image.paste(
+                    self._draw_map_cell(map_coordinates, cell_size), (i * cell_size, j * cell_size))
+        return map_image
 
     def get_width(self) -> int:
         return self._width

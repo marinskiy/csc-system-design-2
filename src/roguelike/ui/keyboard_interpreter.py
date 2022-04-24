@@ -27,8 +27,7 @@ class KeyboardInterpreter:
 
     @staticmethod
     def get_next_key() -> Key:
-        with keyboard.Listener(
-                on_press=_on_press) as listener:
+        with keyboard.Listener(on_press=_on_press) as listener:
             listener.join()
 
         if key_pressed == "w":

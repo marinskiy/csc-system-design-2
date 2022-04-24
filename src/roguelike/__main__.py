@@ -6,6 +6,7 @@ import os
 import argparse
 import typing as tp
 
+from roguelike.ui.drawer import Drawer
 from roguelike.game_engine.game_manager import GameLoop, GameLoader
 from roguelike.game_engine.game_manager.game_constructor.game_generator import GameGenerator
 from roguelike.game_engine.game_manager.game_processor.game_state import GameState
@@ -36,7 +37,10 @@ def get_game_state() -> GameState:
 if __name__ == "__main__":
     current_state = get_game_state()
     loop = GameLoop(current_state)
+    drawer = Drawer(*current_state.environment.map.get_dimensions())
+    drawer.draw(current_state)
 
     while current_state.is_running and current_state.player.stats.health:
         key = KeyboardInterpreter.get_next_key()
         current_state = loop.run_game_turn(key)
+        drawer.draw(current_state)
