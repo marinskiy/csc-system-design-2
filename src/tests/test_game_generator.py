@@ -3,21 +3,21 @@
 import pytest
 
 from roguelike.game_engine.env_manager.map import MapCoordinates
-from roguelike.game_engine.env_manager.map_objects_storage import Obstacle
+from roguelike.game_engine.env_manager.map_objects_storage import Obstacle, PlayerCharacter, Treasure
 from roguelike.game_engine.game_manager.game_constructor.game_generator import GameGenerator, StatsGenerator, \
     PlayerCharacterGenerator, ObstacleGenerator, TreasureGenerator, MapObjectGenerator, \
     MapObjectWheel, MapGenerator, get_random_int_from_range, get_random_float_from_range
 
 
 def test_random_value_from_range() -> None:
-    test_value = get_random_int_from_range([0, 100])
-    assert 0 <= test_value <= 100
+    test_int_value = get_random_int_from_range([0, 100])
+    assert 0 <= test_int_value <= 100
 
-    test_value = get_random_float_from_range([0.1, 0.5])
-    assert 0.1 <= test_value <= 0.5
+    test_float_value = get_random_float_from_range([0.1, 0.5])
+    assert 0.1 <= test_float_value <= 0.5
 
-    test_value = get_random_int_from_range([0, 0])
-    assert test_value == 0
+    test_int_value = get_random_int_from_range([0, 0])
+    assert test_int_value == 0
 
     with pytest.raises(ValueError):
         get_random_int_from_range([100, 0])
@@ -78,13 +78,15 @@ def test_map_object_generated_correctly() -> None:
     )
 
     test_player = object_generator.generate("player")
+    assert isinstance(test_player, PlayerCharacter)
     assert 90.0 <= test_player.stats.health <= 110.0
     assert 90.0 <= test_player.stats.attack <= 110.0
 
     test_obstacle = object_generator.generate("obstacle")
-    assert test_obstacle == Obstacle()
+    assert isinstance(test_obstacle, Obstacle)
 
     test_treasure = object_generator.generate("treasure")
+    assert isinstance(test_treasure, Treasure)
     assert test_treasure.name in ["helmet", "boots", "armor"]
     assert -10 <= test_treasure.stats.health <= 30.0
     assert -10 <= test_treasure.stats.attack <= 30.0

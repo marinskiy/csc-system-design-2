@@ -13,6 +13,7 @@ from roguelike.game_engine.game_manager.game_constructor.game_loader import chec
 from roguelike.game_engine.env_manager.map_objects_storage import Stats, PlayerCharacter, Obstacle, Treasure, MapObject
 from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Mode
 
+
 DEFAULT_GAME_SETTINGS_FILE = os.path.join(os.path.dirname(__file__), "../../../../assets/default_game.json")
 
 
@@ -183,6 +184,8 @@ class GameGenerator:
         geomap = self.map_generator.generate()
 
         player = self.object_generator.generate("player")
+        if not isinstance(player, PlayerCharacter):
+            raise ValueError("player should have type PlayerCharacter")
         world_objects.append(player)
         player_coordinates = MapCoordinates(get_random_int_from_range([0, geomap.get_width() - 1]),
                                             get_random_int_from_range([0, geomap.get_height() - 1]))
