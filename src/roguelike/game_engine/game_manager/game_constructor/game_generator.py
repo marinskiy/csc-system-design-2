@@ -7,14 +7,17 @@ import random
 import os
 import json
 
+from roguelike.game_engine.env_manager.enemies import Mob
 from roguelike.game_engine.env_manager.env_manager import Environment, Inventory
 from roguelike.game_engine.env_manager.map import Map, MapCoordinates
+from roguelike.game_engine.game_manager.action_processor.behaviours import BehaviourFactory
 from roguelike.game_engine.game_manager.game_constructor.game_loader import check_dict_fields
 from roguelike.game_engine.env_manager.map_objects_storage import Stats, PlayerCharacter, Obstacle, Treasure, MapObject
 from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Mode
 
 
 DEFAULT_GAME_SETTINGS_FILE = os.path.join(os.path.dirname(__file__), "../../../../assets/default_game.json")
+MOB_STATS_INCREASE_PER_LEVEL = 0.1
 
 
 def get_random_int_from_range(value: tp.List[tp.Union[int]]) -> int:
@@ -88,6 +91,41 @@ class TreasureGenerator:
 
     def generate(self) -> Treasure:
         return Treasure(random.choice(self.names_list), self.stats_generator.generate())
+
+
+class MobGenerator:
+    """Produces Mobs based on settings"""
+
+    def __init__(self, settings: tp.Dict[str, tp.Any]) -> None:
+        self._validate_input(settings)
+        self.level_range = settings["level"]
+        self.radius_range = settings["radius"]
+        self.behaviours_list = settings["behaviours"]
+        self.stats_generator = StatsGenerator(settings["stats"])
+
+    @staticmethod
+    def _validate_input(settings: tp.Dict[str, tp.Any]) -> None:
+        if not check_dict_fields(settings, ["level", "radius", "behaviours", "stats"]) or \
+                not isinstance(settings["behaviours"], list):
+            raise ValueError("Invalid mob settings json")
+
+        for behaviour in settings["behaviours"]:
+            if not isinstance(behaviour, str) or not BehaviourFactory.is_valid_key(behaviour):
+                raise ValueError("Invalid behaviour type")
+
+    @staticmethod
+    def _apply_level(stat: Stats, level: int) -> None:
+        stat.health = int(stat.health * (1 + MOB_STATS_INCREASE_PER_LEVEL * level))
+        stat.attack = int(stat.attack * (1 + MOB_STATS_INCREASE_PER_LEVEL * level))
+
+    def generate(self) -> Mob:
+        level = get_random_int_from_range(self.level_range)
+        radius = get_random_int_from_range(self.radius_range)
+        stats = self.stats_generator.generate()
+        self._apply_level(stats, level)
+        behaviour = BehaviourFactory.get_behaviour(random.choice(self.behaviours_list))
+
+        return Mob(level, stats, radius, behaviour)
 
 
 class MapObjectGenerator:

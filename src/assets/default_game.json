@@ -39,6 +39,25 @@
           30
         ]
       }
+    },
+    "mob": {
+      "level": [1, 5],
+      "radius": [5, 10],
+      "behaviours": [
+        "aggressive",
+        "cowardly",
+        "passive"
+      ],
+      "stats": {
+        "health": [
+          25,
+          50
+        ],
+        "attack": [
+          25,
+          50
+        ]
+      }
     }
   },
   "wheel": {

@@ -2,14 +2,10 @@
 from random import randrange
 from abc import abstractmethod
 
-
+from ..game_manager.action_processor.behaviours import Behaviour
 from ..game_manager.game_processor.game_state import GameState
 from .map_objects_storage import Creature, Stats, Obstacle
 from .map import MapCoordinates
-
-
-class Behaviour:
-    pass
 
 
 class NPC(Creature):
