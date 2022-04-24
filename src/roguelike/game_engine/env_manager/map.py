@@ -4,7 +4,6 @@ from __future__ import annotations
 import typing as tp
 from dataclasses import dataclass
 from itertools import product
-
 from PIL import Image
 
 from roguelike.game_engine.env_manager.map_objects_storage import MapObject

@@ -39,18 +39,39 @@
           30
         ]
       }
+    },
+    "mob": {
+      "level": [1, 5],
+      "radius": [5, 10],
+      "behaviours": [
+        "aggressive",
+        "cowardly",
+        "passive"
+      ],
+      "stats": {
+        "health": [
+          25,
+          50
+        ],
+        "attack": [
+          25,
+          50
+        ]
+      }
     }
   },
   "wheel": {
     "population": [
       "obstacle",
       "treasure",
+      "mob",
       "none"
     ],
     "weights": [
       10,
       5,
-      85
+      1,
+      84
     ]
   }
 }

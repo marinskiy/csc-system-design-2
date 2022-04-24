@@ -63,7 +63,7 @@ class Creature(MapObject):
         return self._stats
 
 
-class PlayerCharacter(MapObject):
+class PlayerCharacter(Creature):
     """Player Object"""
 
     def __init__(self, stats: Stats) -> None:

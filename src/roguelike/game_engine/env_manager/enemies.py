@@ -1,6 +1,7 @@
 """This module contains classes for enemies"""
 from random import randrange
 from abc import abstractmethod
+from PIL import Image
 import typing as tp
 
 
@@ -22,6 +23,10 @@ class NPC(Creature):
     def act(self, geomap: Map, player: PlayerCharacter) -> None:
         pass
 
+    @property
+    def action_radius(self) -> int:
+        return self._action_radius
+
 
 class Mob(NPC):
     """Normal enemy"""
@@ -31,6 +36,9 @@ class Mob(NPC):
 
     def act(self, geomap: Map, player: PlayerCharacter) -> None:
         pass
+
+    def draw(self, width: int, height: int) -> Image:
+        return Image.new('RGB', (width, height), 'red')
 
 
 class ConfusedMob(NPC):
@@ -72,3 +80,6 @@ class ConfusedMob(NPC):
     def take_damage(self, power: int) -> None:
         super().take_damage(power)
         self._normal.take_damage(power)
+
+    def draw(self, width: int, height: int) -> Image:
+        return Image.new('RGB', (width, height), 'pink')
