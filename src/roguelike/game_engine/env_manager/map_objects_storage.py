@@ -12,7 +12,7 @@ from PIL import Image, ImageDraw
 
 from roguelike.ui.drawable import Drawable
 
-__all__ = ['MapObject', 'Treasure', 'Obstacle', 'PlayerCharacter']
+__all__ = ['MapObject', 'Treasure', 'Obstacle', 'PlayerCharacter', 'Creature', 'Stats']
 
 
 class MapObject(Drawable):
@@ -27,7 +27,6 @@ class Obstacle(MapObject):
 @dataclass
 class Stats:
     """Stats class"""
-
     health: int
     attack: int
 
@@ -38,12 +37,26 @@ class Stats:
             raise NotImplementedError('Summation with unknown type.')
 
 
-class PlayerCharacter(MapObject):
-    """Player Object"""
-
-    def __init__(self, stats: Stats) -> None:
+class Creature(MapObject):
+    """The parent class for all objects capable of action"""
+    def __init__(self, level: int, stats: Stats) -> None:
         super().__init__()
         self._stats = stats
+        self._level = level
+
+    @property
+    def attack_power(self) -> int:
+        return self._stats.attack
+
+    def take_damage(self, power: int) -> None:
+        self._stats.health -= power
+
+    @property
+    def level(self) -> int:
+        return self._level
+
+    def is_dead(self) -> int:
+        return self._stats.health < 0
 
     @property
     def stats(self) -> Stats:
@@ -51,6 +64,14 @@ class PlayerCharacter(MapObject):
 
     def draw(self, width: int, height: int) -> Image:
         return Image.new('RGB', (width, height), 'purple')
+
+
+class PlayerCharacter(Creature):
+    def __init__(self, stats: Stats) -> None:
+        super().__init__(1, stats)
+
+    def gain_experience(self, experience: int) -> None:
+        pass
 
 
 class Treasure(MapObject):

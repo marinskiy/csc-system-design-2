@@ -1,4 +1,5 @@
 """Contains all classes to manage Map entity"""
+from __future__ import annotations
 
 import typing as tp
 from dataclasses import dataclass
@@ -23,6 +24,25 @@ class MapCoordinates:
 
     def __hash__(self) -> int:
         return hash((self.x, self.y))
+
+    @property
+    def left(self) -> MapCoordinates:
+        return MapCoordinates(self.x - 1, self.y)
+
+    @property
+    def right(self) -> MapCoordinates:
+        return MapCoordinates(self.x + 1, self.y)
+
+    @property
+    def up(self) -> MapCoordinates:
+        return MapCoordinates(self.x, self.y - 1)
+
+    @property
+    def down(self) -> MapCoordinates:
+        return MapCoordinates(self.x, self.y + 1)
+
+    def get_neighbours(self) -> tp.List[MapCoordinates]:
+        return [self.left, self.right, self.up, self.down]
 
 
 class MapCell:
