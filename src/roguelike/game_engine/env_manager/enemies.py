@@ -1,6 +1,7 @@
 """This module contains classes for enemies"""
 from random import randrange
 from abc import abstractmethod
+from PIL import Image
 
 from ..game_manager.action_processor.behaviours import Behaviour
 from ..game_manager.game_processor.game_state import GameState
@@ -27,6 +28,9 @@ class Mob(NPC):
 
     def act(self, state: GameState) -> None:
         pass
+
+    def draw(self, width: int, height: int) -> Image:
+        return Image.new('RGB', (width, height), 'red')
 
 
 class ConfusedMob(NPC):
@@ -58,3 +62,6 @@ class ConfusedMob(NPC):
         if self._timeout == 0:
             state.environment.map.remove_object(self)
             state.environment.map.add_object(coordinates, self._normal)
+
+    def draw(self, width: int, height: int) -> Image:
+        return Image.new('RGB', (width, height), 'pink')

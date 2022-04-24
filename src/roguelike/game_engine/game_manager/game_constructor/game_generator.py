@@ -139,7 +139,7 @@ class MapObjectGenerator:
 
     @staticmethod
     def _validate_input(settings: tp.Dict[str, tp.Any]) -> None:
-        if not check_dict_fields(settings, ["player", "obstacle", "treasure"]):
+        if not check_dict_fields(settings, ["player", "obstacle", "treasure", "mob"]):
             raise ValueError("Invalid treasure settings json")
 
     def generate(self, key: str) -> MapObject:

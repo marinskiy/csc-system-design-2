@@ -67,9 +67,13 @@ def test_treasure_generated_correctly() -> None:
 
 def test_map_object_generated_correctly() -> None:
     object_generator = MapObjectGenerator(
-        {"player": {"stats": {"health": [90, 110], "attack": [90, 110]}}, "obstacle": {},
-         "treasure": {"names": ["helmet", "boots", "armor"], "stats": {"health": [-10, 30], "attack": [-10, 30]}}
-         }
+        {
+            "player": {"stats": {"health": [90, 110], "attack": [90, 110]}},
+            "obstacle": {},
+            "treasure": {"names": ["helmet", "boots", "armor"], "stats": {"health": [-10, 30], "attack": [-10, 30]}},
+            "mob": {"level": [1, 5], "radius": [5, 10], "behaviours": ["aggressive", "cowardly", "passive"],
+                    "stats": {"health": [25, 50], "attack": [25, 50]}}
+        }
     )
 
     test_player = object_generator.generate("player")
