@@ -101,16 +101,16 @@ class MobGenerator:
         self.level_range = settings["level"]
         self.radius_range = settings["radius"]
         self.behaviours_list = settings["behaviours"]
+        self.behaviour_factory = BehaviourFactory()
         self.stats_generator = StatsGenerator(settings["stats"])
 
-    @staticmethod
-    def _validate_input(settings: tp.Dict[str, tp.Any]) -> None:
+    def _validate_input(self, settings: tp.Dict[str, tp.Any]) -> None:
         if not check_dict_fields(settings, ["level", "radius", "behaviours", "stats"]) or \
                 not isinstance(settings["behaviours"], list):
             raise ValueError("Invalid mob settings json")
 
         for behaviour in settings["behaviours"]:
-            if not isinstance(behaviour, str) or not BehaviourFactory.is_valid_key(behaviour):
+            if not isinstance(behaviour, str) or not self.behaviour_factory.is_valid_key(behaviour):
                 raise ValueError("Invalid behaviour type")
 
     @staticmethod
@@ -123,7 +123,7 @@ class MobGenerator:
         radius = get_random_int_from_range(self.radius_range)
         stats = self.stats_generator.generate()
         self._apply_level(stats, level)
-        behaviour = BehaviourFactory.get_behaviour(random.choice(self.behaviours_list))
+        behaviour = self.behaviour_factory.get_behaviour(random.choice(self.behaviours_list))
 
         return Mob(level, stats, radius, behaviour)
 
