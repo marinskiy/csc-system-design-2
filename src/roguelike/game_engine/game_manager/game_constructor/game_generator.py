@@ -136,6 +136,7 @@ class MapObjectGenerator:
         self.player_character_generator = PlayerCharacterGenerator(settings["player"])
         self.obstacle_generator = ObstacleGenerator(settings["obstacle"])
         self.treasure_generator = TreasureGenerator(settings["treasure"])
+        self.mob_generator = MobGenerator(settings["mob"])
 
     @staticmethod
     def _validate_input(settings: tp.Dict[str, tp.Any]) -> None:
@@ -149,6 +150,8 @@ class MapObjectGenerator:
             return self.obstacle_generator.generate()
         elif key == "treasure":
             return self.treasure_generator.generate()
+        elif key == "mob":
+            return self.mob_generator.generate()
         else:
             raise ValueError("No such MapObject")
 

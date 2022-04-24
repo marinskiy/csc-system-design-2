@@ -2,6 +2,7 @@
 
 import pytest
 
+from roguelike.game_engine.env_manager.enemies import Mob
 from roguelike.game_engine.env_manager.map import MapCoordinates
 from roguelike.game_engine.env_manager.map_objects_storage import Obstacle, PlayerCharacter, Treasure
 from roguelike.game_engine.game_manager.game_constructor.game_generator import GameGenerator, StatsGenerator, \
@@ -109,6 +110,15 @@ def test_map_object_generated_correctly() -> None:
     assert test_treasure.name in ["helmet", "boots", "armor"]
     assert -10 <= test_treasure.stats.health <= 30
     assert -10 <= test_treasure.stats.attack <= 30
+
+    test_mob = object_generator.generate("mob")
+    assert isinstance(test_mob, Mob)
+    assert 1 <= test_mob.level <= 5
+    assert 5 <= test_mob.action_radius <= 10
+    assert apply_level_multiplier(25, test_mob.level) <= test_mob.stats.health <= apply_level_multiplier(50,
+                                                                                                         test_mob.level)
+    assert apply_level_multiplier(25, test_mob.level) <= test_mob.stats.attack <= apply_level_multiplier(50,
+                                                                                                         test_mob.level)
 
     with pytest.raises(ValueError):
         object_generator.generate("none")
