@@ -3,15 +3,37 @@ Contains game main loop
 """
 
 import os
+import argparse
 
 from roguelike.game_engine.game_manager import GameLoop, GameLoader
+from roguelike.game_engine.game_manager.game_constructor.game_generator import GameGenerator
+from roguelike.game_engine.game_manager.game_processor.game_state import GameState
 from roguelike.ui.keyboard_interpreter import KeyboardInterpreter
 
-DEFAULT_MAP = 'assets/maps/forest.json'
 
-if __name__ == '__main__':
-    file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), DEFAULT_MAP)
-    current_state = GameLoader.load_game(file_path)
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Game command line arguments.")
+    parser.add_argument("-path", type=map_path, help="path to the map")
+    return parser.parse_args()
+
+
+def map_path(path):
+    if os.path.isfile(path) and path.endswith(".json"):
+        return path
+    else:
+        raise argparse.ArgumentTypeError(f"map path {path} is not a valid path")
+
+
+def get_game_state() -> GameState:
+    args = parse_arguments()
+    if args.path is not None:
+        return GameLoader.load_game(args.path)
+    else:
+        return GameGenerator().generate()
+
+
+if __name__ == "__main__":
+    current_state = get_game_state()
     loop = GameLoop(current_state)
 
     while current_state.is_running and current_state.player.stats.health:
