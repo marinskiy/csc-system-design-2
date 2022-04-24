@@ -12,14 +12,14 @@ from roguelike.game_engine.game_manager.game_processor.game_state import GameSta
 
 @pytest.fixture(name="state")
 def generate_state() -> GameState:
-    player = PlayerCharacter(Stats(10.0, 2.0))
+    player = PlayerCharacter(Stats(10, 2))
     geomap = Map(3, 2)
     geomap.add_object(MapCoordinates(1, 1), player)
     obstacle = Obstacle()
     geomap.add_object(MapCoordinates(0, 1), obstacle)
-    treasure = Treasure("Super Helmet", Stats(1.0, 3.0))
+    treasure = Treasure("Super Helmet", Stats(1, 3))
     geomap.add_object(MapCoordinates(2, 1), treasure)
-    item = Treasure("Trashy boots", Stats(0.0, -2.0))
+    item = Treasure("Trashy boots", Stats(0, -2))
     inventory = Inventory([item])
     inventory.change_treasure_state(item)
     return GameState(Mode.MAP, Environment(geomap, [player, obstacle, treasure, item]), inventory, player)
@@ -102,13 +102,13 @@ def test_inventory_actions(state: GameState, actions: ActionManager) -> None:
 
     actions.get_action(Key.E, state)(state)
     assert inventory.presenter.get_selected() == boots
-    assert inventory.get_additional_stats() == Stats(0.0, 0.0)
+    assert inventory.get_additional_stats() == Stats(0, 0)
 
     actions.get_action(Key.W, state)(state)
     assert inventory.presenter.get_selected() == boots
     actions.get_action(Key.S, state)(state)
     assert inventory.presenter.get_selected() == helmet
-    assert inventory.get_additional_stats() == Stats(0.0, 0.0)
+    assert inventory.get_additional_stats() == Stats(0, 0)
 
     actions.get_action(Key.E, state)(state)
     assert inventory.presenter.get_selected() == helmet

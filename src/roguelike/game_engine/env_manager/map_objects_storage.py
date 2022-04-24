@@ -22,8 +22,8 @@ class Obstacle(MapObject):
 
 @dataclass
 class Stats:
-    health: float
-    attack: float
+    health: int
+    attack: int
 
     def __add__(self, other: tp.Any) -> 'Stats':
         if isinstance(other, Stats):

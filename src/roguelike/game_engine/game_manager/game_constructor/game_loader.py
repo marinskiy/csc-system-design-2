@@ -36,7 +36,7 @@ class GameLoader:
         return MapCoordinates(value[0], value[1])
 
     @staticmethod
-    def _load_stats(value: tp.Dict[str, float]) -> Stats:
+    def _load_stats(value: tp.Dict[str, int]) -> Stats:
         if not check_dict_fields(value, ["attack", "health"]):
             raise ValueError("Invalid stats json")
         return Stats(value["health"], value["attack"])

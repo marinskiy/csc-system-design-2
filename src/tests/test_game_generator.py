@@ -6,27 +6,22 @@ from roguelike.game_engine.env_manager.map import MapCoordinates
 from roguelike.game_engine.env_manager.map_objects_storage import Obstacle, PlayerCharacter, Treasure
 from roguelike.game_engine.game_manager.game_constructor.game_generator import GameGenerator, StatsGenerator, \
     PlayerCharacterGenerator, ObstacleGenerator, TreasureGenerator, MapObjectGenerator, \
-    MapObjectWheel, MapGenerator, get_random_int_from_range, get_random_float_from_range
+    MapObjectWheel, MapGenerator, get_random_int_from_range
 
 
 def test_random_value_from_range() -> None:
     test_int_value = get_random_int_from_range([0, 100])
     assert 0 <= test_int_value <= 100
 
-    test_float_value = get_random_float_from_range([0.1, 0.5])
-    assert 0.1 <= test_float_value <= 0.5
-
     test_int_value = get_random_int_from_range([0, 0])
     assert test_int_value == 0
 
     with pytest.raises(ValueError):
         get_random_int_from_range([100, 0])
-    with pytest.raises(ValueError):
-        get_random_float_from_range([0.5, 0.1])
 
 
 def test_stats_generated_correctly() -> None:
-    test_stats = StatsGenerator({"health": [100.0, 150.0], "attack": [10.0, 20.0]}).generate()
+    test_stats = StatsGenerator({"health": [100, 150], "attack": [10, 20]}).generate()
 
     assert 100.0 <= test_stats.health <= 150.0
     assert 10.0 <= test_stats.attack <= 20.0
@@ -34,53 +29,53 @@ def test_stats_generated_correctly() -> None:
     with pytest.raises(ValueError):
         StatsGenerator({})
     with pytest.raises(ValueError):
-        StatsGenerator({"health": [100.0, 110.0], "attack": [100.0, 150.0], "defence": [100.0, 200.0]})
+        StatsGenerator({"health": [100, 110], "attack": [100, 150], "defence": [100, 200]})
 
 
 def test_player_generated_correctly() -> None:
     test_player = PlayerCharacterGenerator(  # pylint: disable=W0212
-        {"stats": {"health": [10.0, 20.0], "attack": [0.0, 100]}}).generate()
+        {"stats": {"health": [10, 20], "attack": [0, 100]}}).generate()
 
-    assert 10.0 <= test_player.stats.health <= 20.0
-    assert 0.0 <= test_player.stats.attack <= 100.0
+    assert 10 <= test_player.stats.health <= 20
+    assert 0 <= test_player.stats.attack <= 100
 
     with pytest.raises(ValueError):
         PlayerCharacterGenerator({})
     with pytest.raises(ValueError):
         PlayerCharacterGenerator(
-            {"name": "Super Helmet", "stats": {"health": [10.0, 20.0], "attack": [0.0, 100]}})
+            {"name": "Super Helmet", "stats": {"health": [10, 20], "attack": [0, 100]}})
 
 
 def test_obstacle_generated_correctly() -> None:
     assert isinstance(ObstacleGenerator({}).generate(), Obstacle)
 
     with pytest.raises(ValueError):
-        ObstacleGenerator({"health": 100.0, "attack": 100.0, "defence": 100.0})
+        ObstacleGenerator({"health": 100, "attack": 100, "defence": 100})
 
 
 def test_treasure_generated_correctly() -> None:
     test_treasure = TreasureGenerator(
-        {"names": ["Helmet", "Boots"], "stats": {"health": [10.0, 20.0], "attack": [0.0, 30]}}).generate()
+        {"names": ["Helmet", "Boots"], "stats": {"health": [10, 20], "attack": [0, 30]}}).generate()
     assert test_treasure.name in ["Helmet", "Boots"]
-    assert 10.0 <= test_treasure.stats.health <= 20.0
+    assert 10 <= test_treasure.stats.health <= 20
 
     with pytest.raises(ValueError):
         TreasureGenerator({})
     with pytest.raises(ValueError):
-        TreasureGenerator({"health": 100.0, "attack": 100.0, "defence": 100.0})
+        TreasureGenerator({"health": 100, "attack": 100, "defence": 100})
 
 
 def test_map_object_generated_correctly() -> None:
     object_generator = MapObjectGenerator(
-        {"player": {"stats": {"health": [90.0, 110.0], "attack": [90.0, 110.0]}}, "obstacle": {},
+        {"player": {"stats": {"health": [90, 110], "attack": [90, 110]}}, "obstacle": {},
          "treasure": {"names": ["helmet", "boots", "armor"], "stats": {"health": [-10, 30], "attack": [-10, 30]}}
          }
     )
 
     test_player = object_generator.generate("player")
     assert isinstance(test_player, PlayerCharacter)
-    assert 90.0 <= test_player.stats.health <= 110.0
-    assert 90.0 <= test_player.stats.attack <= 110.0
+    assert 90 <= test_player.stats.health <= 110
+    assert 90 <= test_player.stats.attack <= 110
 
     test_obstacle = object_generator.generate("obstacle")
     assert isinstance(test_obstacle, Obstacle)
@@ -88,8 +83,8 @@ def test_map_object_generated_correctly() -> None:
     test_treasure = object_generator.generate("treasure")
     assert isinstance(test_treasure, Treasure)
     assert test_treasure.name in ["helmet", "boots", "armor"]
-    assert -10 <= test_treasure.stats.health <= 30.0
-    assert -10 <= test_treasure.stats.attack <= 30.0
+    assert -10 <= test_treasure.stats.health <= 30
+    assert -10 <= test_treasure.stats.attack <= 30
 
     with pytest.raises(ValueError):
         object_generator.generate("none")

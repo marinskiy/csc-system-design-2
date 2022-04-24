@@ -23,28 +23,22 @@ def get_random_int_from_range(value: tp.List[tp.Union[int]]) -> int:
     return random.randint(value[0], value[1])
 
 
-def get_random_float_from_range(value: tp.List[float]) -> float:
-    if len(value) != 2 or value[0] > value[1]:
-        raise ValueError("Invalid value range")
-    return random.uniform(value[0], value[1])
-
-
 class StatsGenerator:
     """Produces Stats based on settings"""
 
-    def __init__(self, settings: tp.Dict[str, tp.List[float]]) -> None:
+    def __init__(self, settings: tp.Dict[str, tp.List[int]]) -> None:
         self._validate_input(settings)
         self.health_range = settings["health"]
         self.attack_range = settings["attack"]
 
     @staticmethod
-    def _validate_input(settings: tp.Dict[str, tp.List[float]]) -> None:
+    def _validate_input(settings: tp.Dict[str, tp.List[int]]) -> None:
         if not check_dict_fields(settings, ["attack", "health"]):
             raise ValueError("Invalid stats settings json")
 
     def generate(self) -> Stats:
-        health = get_random_float_from_range(self.health_range)
-        attack = get_random_float_from_range(self.attack_range)
+        health = get_random_int_from_range(self.health_range)
+        attack = get_random_int_from_range(self.attack_range)
         return Stats(health, attack)
 
 
