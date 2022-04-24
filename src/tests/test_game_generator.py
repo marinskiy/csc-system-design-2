@@ -52,7 +52,7 @@ def test_player_generated_correctly() -> None:
 
 
 def test_obstacle_generated_correctly() -> None:
-    assert ObstacleGenerator({}).generate() == Obstacle()
+    assert isinstance(ObstacleGenerator({}).generate(), Obstacle)
 
     with pytest.raises(ValueError):
         ObstacleGenerator({"health": 100.0, "attack": 100.0, "defence": 100.0})
