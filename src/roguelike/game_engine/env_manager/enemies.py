@@ -19,6 +19,10 @@ class NPC(Creature):
     def act(self, state: GameState) -> None:
         pass
 
+    @property
+    def action_radius(self) -> int:
+        return self._action_radius
+
 
 class Mob(NPC):
     """Normal enemy"""

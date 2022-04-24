@@ -6,7 +6,7 @@ from roguelike.game_engine.env_manager.map import MapCoordinates
 from roguelike.game_engine.env_manager.map_objects_storage import Obstacle, PlayerCharacter, Treasure
 from roguelike.game_engine.game_manager.game_constructor.game_generator import GameGenerator, StatsGenerator, \
     PlayerCharacterGenerator, ObstacleGenerator, TreasureGenerator, MapObjectGenerator, \
-    MapObjectWheel, MapGenerator, get_random_int_from_range
+    MapObjectWheel, MapGenerator, get_random_int_from_range, MobGenerator, MOB_STATS_INCREASE_PER_LEVEL
 
 
 def test_random_value_from_range() -> None:
@@ -63,6 +63,26 @@ def test_treasure_generated_correctly() -> None:
         TreasureGenerator({})
     with pytest.raises(ValueError):
         TreasureGenerator({"health": 100, "attack": 100, "defence": 100})
+
+
+def apply_level_multiplier(value: int, level: int) -> int:
+    return int(value * (1 + MOB_STATS_INCREASE_PER_LEVEL * level))
+
+
+def test_mob_generated_correctly() -> None:
+    test_mob = MobGenerator({
+        "level": [1, 5],
+        "radius": [5, 10],
+        "behaviours": ["aggressive", "cowardly", "passive"],
+        "stats": {"health": [25, 50], "attack": [25, 50]}
+    }).generate()
+
+    assert 1 <= test_mob.level <= 5
+    assert 5 <= test_mob.action_radius <= 10
+    assert apply_level_multiplier(25, test_mob.level) <= test_mob.stats.health <= apply_level_multiplier(50,
+                                                                                                         test_mob.level)
+    assert apply_level_multiplier(25, test_mob.level) <= test_mob.stats.attack <= apply_level_multiplier(50,
+                                                                                                         test_mob.level)
 
 
 def test_map_object_generated_correctly() -> None:

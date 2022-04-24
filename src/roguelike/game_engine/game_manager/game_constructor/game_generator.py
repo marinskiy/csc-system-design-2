@@ -97,11 +97,11 @@ class MobGenerator:
     """Produces Mobs based on settings"""
 
     def __init__(self, settings: tp.Dict[str, tp.Any]) -> None:
+        self.behaviour_factory = BehaviourFactory()
         self._validate_input(settings)
         self.level_range = settings["level"]
         self.radius_range = settings["radius"]
         self.behaviours_list = settings["behaviours"]
-        self.behaviour_factory = BehaviourFactory()
         self.stats_generator = StatsGenerator(settings["stats"])
 
     def _validate_input(self, settings: tp.Dict[str, tp.Any]) -> None:
