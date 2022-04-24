@@ -62,6 +62,16 @@ class Creature(MapObject):
     def stats(self) -> Stats:
         return self._stats
 
+
+class PlayerCharacter(MapObject):
+    """Player Object"""
+
+    def __init__(self, stats: Stats) -> None:
+        super().__init__(1, stats)
+
+    def gain_experience(self, experience: int) -> None:
+        pass
+
     def draw(self, width: int, height: int) -> Image:
         return Image.new('RGB', (width, height), 'purple')
 
