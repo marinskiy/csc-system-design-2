@@ -71,7 +71,8 @@ class ObstacleGenerator:
         if len(settings) != 0:
             raise ValueError("Invalid obstacle settings json")
 
-    def generate(self) -> Obstacle:
+    @staticmethod
+    def generate() -> Obstacle:
         return Obstacle()
 
 
