@@ -142,4 +142,4 @@ local-env-update: .local-conda-env-update .install  ## Update local conda env
 
 .PHONY: launch
 launch: ## Launch roguelike
-	${VENV_PYTHON} -m roguelike
+	sudo ${VENV_PYTHON} -m roguelike

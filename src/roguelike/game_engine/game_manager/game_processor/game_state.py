@@ -9,14 +9,14 @@ from roguelike.game_engine.env_manager import Environment, Inventory, map_object
 
 
 class Key(Enum):
-    W = auto()
-    A = auto()
-    S = auto()
-    D = auto()
-    E = auto()
-    II = auto()
-    M = auto()
-    Q = auto()
+    W = "w"
+    A = "a"
+    S = "s"
+    D = "d"
+    E = "e"
+    II = "i"
+    M = "m"
+    Q = "q"
 
 
 class Mode(Enum):

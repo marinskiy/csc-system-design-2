@@ -11,6 +11,7 @@ from roguelike.game_engine.game_manager import GameLoop, GameLoader
 from roguelike.game_engine.game_manager.game_constructor.game_generator import GameGenerator
 from roguelike.game_engine.game_manager.game_processor.game_state import GameState
 from roguelike.ui.keyboard_interpreter import KeyboardInterpreter
+from roguelike.ui.drawer import Drawer
 
 
 def parse_arguments() -> tp.Any:
