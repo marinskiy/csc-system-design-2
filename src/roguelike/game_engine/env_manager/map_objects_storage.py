@@ -42,6 +42,7 @@ class Stats:
 
 class Creature(MapObject, metaclass=ABCMeta):
     """The parent class for all objects capable of action"""
+
     def __init__(self, level: int, stats: Stats) -> None:
         super().__init__()
         self._stats = stats
@@ -70,10 +71,23 @@ class PlayerCharacter(Creature):
     """Player Object"""
 
     def __init__(self, stats: Stats) -> None:
-        super().__init__(1, stats)
+        super().__init__(level=1, stats=stats)
+        self._experience = 0
+
+    def _calculate_exp_needed_for_new_level(self) -> int:
+        return max(self.level + 1, 0)
+
+    def _level_up(self) -> None:
+        exp_needed_for_new_level = self._calculate_exp_needed_for_new_level()
+        if self._experience >= exp_needed_for_new_level:
+            self._experience -= exp_needed_for_new_level
+            self._level += 1
 
     def gain_experience(self, experience: int) -> None:
-        pass
+        if experience <= 0:
+            raise ValueError('Cant gain non positive exp.')
+        self._experience += experience
+        self._level_up()
 
     def draw(self, width: int, height: int) -> Image:
         return Image.new('RGB', (width, height), 'purple')
