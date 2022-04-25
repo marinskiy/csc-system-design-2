@@ -2,16 +2,15 @@
 Contains game main loop
 """
 
-import os
 import argparse
+import os
 import typing as tp
 
-from roguelike.ui.drawer import Drawer
 from roguelike.game_engine.game_manager import GameLoop, GameLoader
 from roguelike.game_engine.game_manager.game_constructor.game_generator import GameGenerator
 from roguelike.game_engine.game_manager.game_processor.game_state import GameState
-from roguelike.ui.keyboard_interpreter import KeyboardInterpreter
 from roguelike.ui.drawer import Drawer
+from roguelike.ui.keyboard_interpreter import KeyboardInterpreter
 
 
 def parse_arguments() -> tp.Any:
