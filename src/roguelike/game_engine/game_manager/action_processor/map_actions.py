@@ -58,12 +58,12 @@ def _attack_creature(
 
     if critical_hit == 1:
         def callback() -> None:
-            coordinates = environment.map.get_coordinates(confused)
-            if coordinates is None:
+            mob_coordinates = environment.map.get_coordinates(confused)
+            if mob_coordinates is None:
                 raise RuntimeError
             environment.map.remove_object(confused)
             environment.enemies.remove(confused)
-            environment.map.add_object(coordinates, npc)
+            environment.map.add_object(mob_coordinates, npc)
             environment.enemies.add(npc)
 
         confused = ConfusedMob(npc, 3, callback)
