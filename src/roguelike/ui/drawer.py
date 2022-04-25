@@ -3,7 +3,7 @@
 import typing as tp
 from tempfile import NamedTemporaryFile
 
-import PySimpleGUI as sg
+import PySimpleGUI as SimpleGUI
 from PIL import Image
 
 import roguelike.const as const
@@ -38,13 +38,13 @@ class Drawer:
         width = self._map_width + self._inventory_width
         height = max(self._map_height, self._inventory_height)
         layout = [
-            [sg.Button('Start')],
-            [sg.Text('World Map')],
-            [sg.Graph(
+            [SimpleGUI.Button('Start')],
+            [SimpleGUI.Text('World Map')],
+            [SimpleGUI.Graph(
                 canvas_size=(width, height), key='GRAPH',
                 graph_bottom_left=(0, 0), graph_top_right=(width, height))],
         ]
-        self._window = sg.Window('Roguelike').Layout(layout)
+        self._window = SimpleGUI.Window('Roguelike').Layout(layout)
         while True:
             event, _ = self._window.Read()
             if event == 'Start':
