@@ -46,8 +46,6 @@ class MapCoordinates:
 
 class MapCell:
     """Stores items for given map cell"""
-    # todo: update schema
-    #   new methods: add, remove
     def __init__(self) -> None:
         self._items: tp.Set[MapObject] = set()
 
@@ -102,8 +100,6 @@ class Map(Drawable):
         return self._coord_to_cell[coordinates].items
 
     def add_object(self, coordinates: MapCoordinates, map_object: MapObject) -> None:
-        # todo: design
-        #  added coordinates as arg
         if not self._are_valid_coordinates(coordinates):
             return
         if self._is_on_the_map(map_object):
@@ -112,8 +108,6 @@ class Map(Drawable):
         self._map_object_to_coord[map_object] = coordinates
 
     def remove_object(self, map_object: MapObject) -> None:
-        # todo: design
-        #  added coordinates as arg
         if not self._is_on_the_map(map_object):
             return
         coordinates = self._map_object_to_coord.pop(map_object)
