@@ -6,7 +6,7 @@ Some objects may have `Stats` for changing owner characteristics.
 """
 
 import typing as tp
-from abc import abstractmethod
+from abc import abstractmethod, ABCMeta
 from dataclasses import dataclass
 
 from PIL import Image, ImageDraw
@@ -40,7 +40,7 @@ class Stats:
             raise NotImplementedError('Summation with unknown type.')
 
 
-class Creature(MapObject):
+class Creature(MapObject, metaclass=ABCMeta):
     """The parent class for all objects capable of action"""
     def __init__(self, level: int, stats: Stats) -> None:
         super().__init__()
