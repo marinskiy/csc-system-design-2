@@ -40,12 +40,10 @@ class MapCoordinates:
     def down(self) -> MapCoordinates:
         return MapCoordinates(self.x, self.y + 1)
 
-    def get_neighbours(self) -> tp.List[MapCoordinates]:
-        return [self.left, self.right, self.up, self.down]
-
 
 class MapCell:
     """Stores items for given map cell"""
+
     def __init__(self) -> None:
         self._items: tp.Set[MapObject] = set()
 
@@ -141,3 +139,17 @@ class Map(Drawable):
 
     def get_height(self) -> int:
         return self._height
+
+    def get_neighbours(
+            self, coordinates: MapCoordinates,
+    ) -> tp.Tuple[MapCoordinates, ...]:
+        valid_neighbours = []
+        if coordinates.x > 0:
+            valid_neighbours.append(coordinates.left)
+        if coordinates.y > 0:
+            valid_neighbours.append(coordinates.down)
+        if coordinates.x < self._width - 1:
+            valid_neighbours.append(coordinates.right)
+        if coordinates.y < self._height - 1:
+            valid_neighbours.append(coordinates.up)
+        return tuple(valid_neighbours)

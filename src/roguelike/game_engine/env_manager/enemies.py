@@ -1,12 +1,12 @@
 """This module contains classes for enemies"""
-from random import randrange
-from abc import abstractmethod
-from PIL import Image
 import typing as tp
+from abc import abstractmethod
+from random import randrange
 
+from PIL import Image
 
-from .map_objects_storage import Creature, Stats, Obstacle, PlayerCharacter
 from .map import MapCoordinates, Map
+from .map_objects_storage import Creature, Stats, Obstacle, PlayerCharacter
 
 
 class Behaviour:
@@ -85,7 +85,8 @@ class ConfusedMob(NPC):
         return self._normal
 
     def _act_confused(self, geomap: Map, coordinates: MapCoordinates) -> None:
-        new_coordinates = coordinates.get_neighbours()[randrange(4)]
+        possible_coordinates = geomap.get_neighbours(coordinates)
+        new_coordinates = possible_coordinates[randrange(len(possible_coordinates))]
         items = geomap.get_objects(new_coordinates)
 
         if Obstacle() in items:

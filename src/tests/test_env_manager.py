@@ -58,15 +58,60 @@ def test_treasure_creates_properly() -> None:
     assert treasure.stats == Stats(0, 1)
 
 
-def test_coordinates_neighbours() -> None:
+def test_coordinates_neighbours(map_with_obstacle: Map) -> None:
     coordinates = MapCoordinates(0, 0)
     assert coordinates.up == MapCoordinates(0, -1)
     assert coordinates.down == MapCoordinates(0, 1)
     assert coordinates.left == MapCoordinates(-1, 0)
     assert coordinates.right == MapCoordinates(1, 0)
-    assert coordinates.get_neighbours() == [
-        MapCoordinates(-1, 0), MapCoordinates(1, 0),
-        MapCoordinates(0, -1), MapCoordinates(0, 1)]
+
+    coordinates = MapCoordinates(0, 0)
+    proposed_neighbours = map_with_obstacle.get_neighbours(coordinates)
+    assert len(proposed_neighbours) == 2
+    assert coordinates.up in proposed_neighbours
+    assert coordinates.right in proposed_neighbours
+
+    coordinates = MapCoordinates(1, 0)
+    proposed_neighbours = map_with_obstacle.get_neighbours(coordinates)
+    assert len(proposed_neighbours) == 3
+    assert coordinates.up in proposed_neighbours
+    assert coordinates.left in proposed_neighbours
+    assert coordinates.right in proposed_neighbours
+
+    coordinates = MapCoordinates(0, 1)
+    proposed_neighbours = map_with_obstacle.get_neighbours(coordinates)
+    assert len(proposed_neighbours) == 3
+    assert coordinates.up in proposed_neighbours
+    assert coordinates.down in proposed_neighbours
+    assert coordinates.right in proposed_neighbours
+
+    coordinates = MapCoordinates(2, 2)
+    proposed_neighbours = map_with_obstacle.get_neighbours(coordinates)
+    assert len(proposed_neighbours) == 2
+    assert coordinates.down in proposed_neighbours
+    assert coordinates.left in proposed_neighbours
+
+    coordinates = MapCoordinates(1, 2)
+    proposed_neighbours = map_with_obstacle.get_neighbours(coordinates)
+    assert len(proposed_neighbours) == 3
+    assert coordinates.down in proposed_neighbours
+    assert coordinates.left in proposed_neighbours
+    assert coordinates.right in proposed_neighbours
+
+    coordinates = MapCoordinates(2, 1)
+    proposed_neighbours = map_with_obstacle.get_neighbours(coordinates)
+    assert len(proposed_neighbours) == 3
+    assert coordinates.up in proposed_neighbours
+    assert coordinates.down in proposed_neighbours
+    assert coordinates.left in proposed_neighbours
+
+    coordinates = MapCoordinates(1, 1)
+    proposed_neighbours = map_with_obstacle.get_neighbours(coordinates)
+    assert len(proposed_neighbours) == 4
+    assert coordinates.up in proposed_neighbours
+    assert coordinates.down in proposed_neighbours
+    assert coordinates.left in proposed_neighbours
+    assert coordinates.right in proposed_neighbours
 
 
 def test_map_creates_correctly() -> None:
