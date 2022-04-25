@@ -30,9 +30,9 @@ class BehaviourFactory:
 
     def __init__(self) -> None:
         self._behaviours = {
-            "aggressive": AggressiveBehaviour(),
-            "cowardly": CowardlyBehaviour(),
-            "passive": PassiveBehaviour()
+            'aggressive': AggressiveBehaviour(),
+            'cowardly': CowardlyBehaviour(),
+            'passive': PassiveBehaviour()
         }
 
     def is_valid_key(self, key: str) -> bool:
