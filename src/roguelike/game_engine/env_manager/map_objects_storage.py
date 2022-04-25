@@ -5,23 +5,25 @@ All those objects must inherit from `MapObject` class.
 Some objects may have `Stats` for changing owner characteristics.
 """
 
+import copy
 import typing as tp
 from dataclasses import dataclass
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
-from roguelike.ui.drawable import Drawable
+from roguelike.ui.drawable import Drawable, drawable, load_image_resource
 
 __all__ = ['MapObject', 'Treasure', 'Obstacle', 'PlayerCharacter', 'Creature', 'Stats']
 
 
-class MapObject(Drawable):
-    pass
+class MapObject:
+    def __init__(self):
+        assert isinstance(self, Drawable)
 
 
+@drawable('mountains.png')
 class Obstacle(MapObject):
-    def draw(self, width: int, height: int) -> Image:
-        return Image.new('RGB', (width, height), 'blue')
+    pass
 
 
 @dataclass
@@ -64,6 +66,7 @@ class Creature(MapObject):
         return self._stats
 
 
+@drawable('player.png')
 class PlayerCharacter(Creature):
     """Player Object"""
 
@@ -73,11 +76,8 @@ class PlayerCharacter(Creature):
     def gain_experience(self, experience: int) -> None:
         pass
 
-    def draw(self, width: int, height: int) -> Image:
-        return Image.new('RGB', (width, height), 'purple')
 
-
-class Treasure(MapObject):
+class Treasure(MapObject, Drawable):
     """Class for describing treasure that can enhance owner's stats"""
 
     def __init__(self, name: str, stats: Stats) -> None:
@@ -93,12 +93,13 @@ class Treasure(MapObject):
     def name(self) -> str:
         return self._name
 
-    def draw(self, width: int, height: int) -> Image:
-        img = Image.new('RGB', (width, height), 'cyan')
-        draw = ImageDraw.Draw(img)
-        text = f'{int(self._stats.attack)}/{int(self._stats.health)}'
-        textwidth, textheight = draw.textsize(text)
-        x = (width - textwidth) // 2
-        y = (height - textheight) // 2
-        draw.text((x, y), text)
+    def draw(self, width: int, height: int, draw_stats=False) -> Image:
+        img = copy.copy(load_image_resource('treasure.png', width, height))
+        if not draw_stats:
+            return img
+        fnt = ImageFont.load_default()
+        d = ImageDraw.Draw(img)
+
+        text = f'{self._stats.attack}/{self._stats.health}'
+        d.text((2, height - 15), text, font=fnt, fill=(0, 0, 0))
         return img

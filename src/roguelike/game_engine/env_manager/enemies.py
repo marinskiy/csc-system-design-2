@@ -8,6 +8,8 @@ from ..game_manager.game_processor.game_state import GameState
 from .map_objects_storage import Creature, Stats, Obstacle
 from .map import MapCoordinates
 
+from roguelike.ui.drawable import drawable
+
 
 class NPC(Creature):
     """The parent class for enemies"""
@@ -24,6 +26,7 @@ class NPC(Creature):
         return self._action_radius
 
 
+@drawable('demon.png')
 class Mob(NPC):
     """Normal enemy"""
     def __init__(self, level: int, stats: Stats, radius: int, behaviour: Behaviour) -> None:
@@ -33,10 +36,8 @@ class Mob(NPC):
     def act(self, state: GameState) -> None:
         pass
 
-    def draw(self, width: int, height: int) -> Image:
-        return Image.new('RGB', (width, height), 'red')
 
-
+@drawable('pepe.png')
 class ConfusedMob(NPC):
     """Enemy in a confused state"""
     def __init__(self, normal_mob: NPC, timeout: int) -> None:
@@ -66,6 +67,3 @@ class ConfusedMob(NPC):
         if self._timeout == 0:
             state.environment.map.remove_object(self)
             state.environment.map.add_object(coordinates, self._normal)
-
-    def draw(self, width: int, height: int) -> Image:
-        return Image.new('RGB', (width, height), 'pink')
