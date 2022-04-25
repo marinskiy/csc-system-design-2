@@ -1,13 +1,13 @@
 """This module contains classes for enemies"""
 import random
+
 import typing as tp
 from abc import abstractmethod
 from enum import Enum, auto
 
-from PIL import Image
-
 from .map import MapCoordinates, Map
 from .map_objects_storage import Creature, Stats, Obstacle, PlayerCharacter
+from roguelike.ui.drawable import drawable
 
 
 class CreatureMove(Enum):
@@ -127,6 +127,8 @@ class BehaviourFactory:
     def get_behaviour(cls, key: str) -> Behaviour:
         return cls._behaviours[key]
 
+from roguelike.ui.drawable import drawable
+
 
 class NPC(Creature):
     """The parent class for enemies"""
@@ -144,6 +146,7 @@ class NPC(Creature):
         return self._action_radius
 
 
+@drawable('demon.png')
 class Mob(NPC):
     """Normal enemy"""
 
@@ -154,10 +157,8 @@ class Mob(NPC):
     def act(self, geomap: Map, player: PlayerCharacter) -> None:
         self._behaviour.act(self, geomap, player)
 
-    def draw(self, width: int, height: int) -> Image:
-        return Image.new('RGB', (width, height), 'red')
 
-
+@drawable('pepe.png')
 class ConfusedMob(NPC):
     """Enemy in a confused state"""
 
@@ -194,6 +195,3 @@ class ConfusedMob(NPC):
     def take_damage(self, power: int) -> None:
         super().take_damage(power)
         self._normal.take_damage(power)
-
-    def draw(self, width: int, height: int) -> Image:
-        return Image.new('RGB', (width, height), 'pink')

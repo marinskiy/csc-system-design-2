@@ -7,8 +7,8 @@ from PIL import Image
 
 from roguelike import const
 from roguelike.game_engine.env_manager.map import Map
+from roguelike.ui.drawable import Drawable, load_image_resource
 from roguelike.game_engine.env_manager.map_objects_storage import Treasure, MapObject, Stats, Creature
-from roguelike.ui.drawable import Drawable
 
 
 class InventoryPresenter(Drawable):
@@ -36,11 +36,12 @@ class InventoryPresenter(Drawable):
 
     def _draw_inventory_cell(self, treasure_id: int, cell_size: int, mark_as_selected: bool) -> Image:
         if treasure_id >= len(self._treasures):
-            return Image.new('RGB', (cell_size, cell_size), 'black')
+            return load_image_resource('empty_inventory.png', cell_size, cell_size)
         if not mark_as_selected:
-            return self._treasures[treasure_id].draw(cell_size, cell_size)
+            return self._treasures[treasure_id].draw(cell_size, cell_size, draw_stats=True)
         result = Image.new('RGB', (cell_size, cell_size), color='blue')
-        result.paste(self._treasures[treasure_id].draw(cell_size - 10, cell_size - 10), (5, 5))
+        treasure_icon = self._treasures[treasure_id].draw(cell_size - 10, cell_size - 10, draw_stats=True)
+        result.paste(treasure_icon, (5, 5))
         return result
 
     def draw(self, width: int, height: int) -> Image:
