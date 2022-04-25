@@ -76,14 +76,6 @@ class PlayerCharacter(Creature):
         return Image.new('RGB', (width, height), 'purple')
 
 
-class PlayerCharacter(Creature):
-    def __init__(self, stats: Stats) -> None:
-        super().__init__(1, stats)
-
-    def gain_experience(self, experience: int) -> None:
-        pass
-
-
 class Treasure(MapObject):
     """Class for describing treasure that can enhance owner's stats"""
 

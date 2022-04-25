@@ -6,7 +6,7 @@ import pytest
 
 from roguelike.game_engine.env_manager import Map, MapCoordinates, Stats
 from roguelike.game_engine.env_manager.map_objects_storage import Treasure, Obstacle, PlayerCharacter
-from roguelike.game_engine.env_manager.enemies import Mob, ConfusedMob, Behaviour
+from roguelike.game_engine.env_manager.enemies import Mob, ConfusedMob, PassiveBehaviour
 from roguelike.game_engine.game_manager.action_processor.action_manager import ActionManager
 from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Key, Mode, Environment, Inventory
 
@@ -23,7 +23,7 @@ def generate_state() -> GameState:
     item = Treasure("Trashy boots", Stats(0, -2))
     inventory = Inventory([item])
     inventory.change_treasure_state(item)
-    enemy = Mob(3, Stats(7, 1), 3, Behaviour())
+    enemy = Mob(3, Stats(7, 1), 3, PassiveBehaviour())
     geomap.add_object(MapCoordinates(0, 0), enemy)
     return GameState(Mode.MAP, Environment(geomap, [player, obstacle, treasure, item], {enemy}), inventory, player)
 
@@ -169,7 +169,7 @@ def test_menu_actions(state: GameState, actions: ActionManager) -> None:
 
 def test_confusion() -> None:
     random.seed(5)
-    normal = Mob(1, Stats(2, 2), 1, Behaviour())
+    normal = Mob(1, Stats(2, 2), 1, PassiveBehaviour())
     confused = ConfusedMob(normal, 5, lambda: None)
     geomap = Map(10, 10)
     geomap.add_object(MapCoordinates(5, 5), confused)

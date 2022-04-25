@@ -7,10 +7,9 @@ import random
 import os
 import json
 
-from roguelike.game_engine.env_manager.enemies import Mob
+from roguelike.game_engine.env_manager.enemies import Mob, BehaviourFactory
 from roguelike.game_engine.env_manager.env_manager import Environment, Inventory
 from roguelike.game_engine.env_manager.map import Map, MapCoordinates
-from roguelike.game_engine.game_manager.action_processor.behaviours import BehaviourFactory
 from roguelike.game_engine.game_manager.game_constructor.game_loader import check_dict_fields
 from roguelike.game_engine.env_manager.map_objects_storage import Stats, PlayerCharacter, Obstacle, Treasure, MapObject
 from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Mode
