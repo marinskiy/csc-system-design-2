@@ -1,13 +1,14 @@
 """Contains all classes to manage Map entity"""
 from __future__ import annotations
 
-import typing as tp
-from dataclasses import dataclass
 from itertools import product
+import typing as tp
+
+from dataclasses import dataclass
 from PIL import Image
 
 from roguelike.game_engine.env_manager.map_objects_storage import MapObject
-from roguelike.ui.drawable import Drawable
+from roguelike.ui.drawable import Drawable, load_image_resource
 
 
 @dataclass
@@ -131,7 +132,7 @@ class Map(Drawable):
         objs = list(self.get_objects(coordinates))
         if objs:
             return objs[-1].draw(size, size)
-        return Image.new('RGB', (size, size), color='green')
+        return load_image_resource('grass.png', size, size)
 
     def draw(self, width: int, height: int) -> Image:
         cell_size = width // self._width
