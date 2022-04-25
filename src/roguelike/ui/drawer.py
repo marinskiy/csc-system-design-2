@@ -1,14 +1,13 @@
 """Contains Drawer"""
 
 import typing as tp
-
 from tempfile import NamedTemporaryFile
 
 import PySimpleGUI as sg
-
 from PIL import Image
 
 import roguelike.const as const
+
 
 from roguelike.game_engine.env_manager.env_manager import Inventory
 from roguelike.game_engine.env_manager.map_objects_storage import PlayerCharacter

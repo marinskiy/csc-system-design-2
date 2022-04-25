@@ -11,4 +11,4 @@ dependencies:
   - Pillow=8.1.2
   - PySimpleGUI=4.59.0
   - pip:
-      - pynput==1.7.6
+      - keyboard==0.13.5

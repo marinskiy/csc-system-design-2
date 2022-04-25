@@ -207,7 +207,6 @@ class GameGenerator:
             raise ValueError("Invalid default game json")
 
     def _load_settings(self) -> tp.Dict[str, tp.Any]:
-        settings = {}
         with open(DEFAULT_GAME_SETTINGS_FILE, encoding="utf-8") as json_file:
             settings = json.load(json_file)
         self._validate_settings(settings)

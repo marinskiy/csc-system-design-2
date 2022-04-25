@@ -124,9 +124,6 @@ class Map(Drawable):
             return None
         return self._map_object_to_coord[map_object]
 
-    def get_dimensions(self) -> tp.Tuple[int, int]:
-        return self._width, self._height
-
     def _draw_map_cell(self, coordinates: MapCoordinates, size: int) -> Image:
         objs = list(self.get_objects(coordinates))
         if objs:

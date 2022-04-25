@@ -6,6 +6,7 @@ Some objects may have `Stats` for changing owner characteristics.
 """
 
 import typing as tp
+from abc import abstractmethod
 from dataclasses import dataclass
 
 from PIL import Image, ImageDraw
@@ -16,7 +17,9 @@ __all__ = ['MapObject', 'Treasure', 'Obstacle', 'PlayerCharacter', 'Creature', '
 
 
 class MapObject(Drawable):
-    pass
+    @abstractmethod
+    def draw(self, width: int, height: int) -> Image:
+        pass
 
 
 class Obstacle(MapObject):

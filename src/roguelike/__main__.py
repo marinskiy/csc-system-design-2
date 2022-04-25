@@ -2,14 +2,14 @@
 Contains game main loop
 """
 
-import os
 import argparse
+import os
 import typing as tp
 
-from roguelike.ui.drawer import Drawer
 from roguelike.game_engine.game_manager import GameLoop, GameLoader
 from roguelike.game_engine.game_manager.game_constructor.game_generator import GameGenerator
 from roguelike.game_engine.game_manager.game_processor.game_state import GameState
+from roguelike.ui.drawer import Drawer
 from roguelike.ui.keyboard_interpreter import KeyboardInterpreter
 
 
@@ -37,7 +37,8 @@ def get_game_state() -> GameState:
 if __name__ == "__main__":
     current_state = get_game_state()
     loop = GameLoop(current_state)
-    drawer = Drawer(*current_state.environment.map.get_dimensions())
+    drawer = Drawer(current_state.environment.map.get_width(),
+                    current_state.environment.map.get_height())
     drawer.draw(current_state)
 
     while current_state.is_running and current_state.player.stats.health:
