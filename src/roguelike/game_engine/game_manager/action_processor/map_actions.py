@@ -3,10 +3,10 @@
 import typing as tp
 from random import randrange
 
-from ....game_engine.env_manager import Map, MapCoordinates, MapObject, map_objects_storage, Environment
-from ....game_engine.env_manager.enemies import NPC, ConfusedMob
-from .bases import BaseAction, BaseActionFactory
-from ..game_processor.game_state import GameState, Key, Mode
+from roguelike.game_engine.env_manager import Map, MapCoordinates, MapObject, map_objects_storage, Environment
+from roguelike.game_engine.env_manager.enemies import NPC, ConfusedMob
+from roguelike.game_engine.game_manager.action_processor.bases import BaseAction, BaseActionFactory
+from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Key, Mode
 
 
 class SwitchToInventoryAction(BaseAction):
