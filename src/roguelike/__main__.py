@@ -37,7 +37,8 @@ def get_game_state() -> GameState:
 if __name__ == "__main__":
     current_state = get_game_state()
     loop = GameLoop(current_state)
-    drawer = Drawer(*current_state.environment.map.get_dimensions())
+    drawer = Drawer(current_state.environment.map.get_width(),
+                    current_state.environment.map.get_height())
     drawer.draw(current_state)
 
     while current_state.is_running and current_state.player.stats.health:
