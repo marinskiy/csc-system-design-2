@@ -97,7 +97,6 @@ class MobGenerator:
     """Produces Mobs based on settings"""
 
     def __init__(self, settings: tp.Dict[str, tp.Any]) -> None:
-        self.behaviour_factory = BehaviourFactory()
         self._validate_input(settings)
         self.level_range = settings["level"]
         self.radius_range = settings["radius"]
@@ -110,7 +109,7 @@ class MobGenerator:
             raise ValueError("Invalid mob settings json")
 
         for behaviour in settings["behaviours"]:
-            if not isinstance(behaviour, str) or not self.behaviour_factory.is_valid_key(behaviour):
+            if not isinstance(behaviour, str) or not BehaviourFactory.is_valid_key(behaviour):
                 raise ValueError("Invalid behaviour type")
 
     @staticmethod
@@ -123,7 +122,7 @@ class MobGenerator:
         radius = get_random_int_from_range(self.radius_range)
         stats = self.stats_generator.generate()
         self._apply_level(stats, level)
-        behaviour = self.behaviour_factory.get_behaviour(random.choice(self.behaviours_list))
+        behaviour = BehaviourFactory.get_behaviour(random.choice(self.behaviours_list))
 
         return Mob(level, stats, radius, behaviour)
 

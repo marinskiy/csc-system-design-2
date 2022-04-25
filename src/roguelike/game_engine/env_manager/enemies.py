@@ -28,18 +28,19 @@ class PassiveBehaviour(Behaviour):
 class BehaviourFactory:
     """Produces behaviours of mobs"""
 
-    def __init__(self) -> None:
-        self._behaviours = {
-            'aggressive': AggressiveBehaviour(),
-            'cowardly': CowardlyBehaviour(),
-            'passive': PassiveBehaviour()
-        }
+    _behaviours = {
+        'aggressive': AggressiveBehaviour(),
+        'cowardly': CowardlyBehaviour(),
+        'passive': PassiveBehaviour()
+    }
 
-    def is_valid_key(self, key: str) -> bool:
-        return key in self._behaviours
+    @classmethod
+    def is_valid_key(cls, key: str) -> bool:
+        return key in cls._behaviours
 
-    def get_behaviour(self, key: str) -> Behaviour:
-        return self._behaviours[key]
+    @classmethod
+    def get_behaviour(cls, key: str) -> Behaviour:
+        return cls._behaviours[key]
 
 
 class NPC(Creature):
