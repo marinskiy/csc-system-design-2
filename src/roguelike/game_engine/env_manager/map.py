@@ -105,6 +105,27 @@ class Map(Drawable):
             return None
         return self._map_object_to_coord[map_object]
 
+    def get_dimensions(self) -> tp.Tuple[int, int]:
+        return self._width, self._height
+
+    def _draw_map_cell(self, coordinates: MapCoordinates, size: int) -> Image:
+        objs = list(self.get_objects(coordinates))
+        if objs:
+            return objs[-1].draw(size, size)
+        return Image.new('RGB', (size, size), color='green')
+
+    def draw(self, width: int, height: int) -> Image:
+        cell_size = width // self._width
+        assert width % self._width == height % self._height
+        assert width // self._width == height // self._height
+        map_image = Image.new('RGB', (width, height))
+        for i in range(self._width):
+            for j in range(self._height):
+                map_coordinates = MapCoordinates(i, j)
+                map_image.paste(
+                    self._draw_map_cell(map_coordinates, cell_size), (i * cell_size, j * cell_size))
+        return map_image
+
     def get_width(self) -> int:
         return self._width
 
