@@ -352,7 +352,7 @@ def test_player_character_levels_up() -> None:
     assert player_character._experience == 1  # pylint: disable=protected-access
     assert player_character.stats == Stats(2, 4)
 
-    player_character._level_up()
+    player_character._level_up()  # pylint: disable=protected-access
     assert player_character.stats == Stats(3, 5)
 
 
