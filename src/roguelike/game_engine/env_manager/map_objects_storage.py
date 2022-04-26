@@ -4,7 +4,7 @@ All those objects must inherit from `MapObject` class.
 
 Some objects may have `Stats` for changing owner characteristics.
 """
-
+import random
 import typing as tp
 from abc import abstractmethod, ABCMeta
 from dataclasses import dataclass
@@ -78,16 +78,22 @@ class PlayerCharacter(Creature):
         return max(self.level + 1, 0)
 
     def _level_up(self) -> None:
-        exp_needed_for_new_level = self._calculate_exp_needed_for_new_level()
-        if self._experience >= exp_needed_for_new_level:
-            self._experience -= exp_needed_for_new_level
-            self._level += 1
+        self._level += 1
+        possible_stats_increase = (
+            Stats(0, 1),
+            Stats(1, 0),
+            Stats(1, 1),
+        )
+        self._stats += random.choice(possible_stats_increase)
 
     def gain_experience(self, experience: int) -> None:
         if experience <= 0:
             raise ValueError('Cant gain non positive exp.')
         self._experience += experience
-        self._level_up()
+        exp_needed_for_new_level = self._calculate_exp_needed_for_new_level()
+        if self._experience >= exp_needed_for_new_level:
+            self._experience -= exp_needed_for_new_level
+            self._level_up()
 
     def draw(self, width: int, height: int) -> Image:
         return Image.new('RGB', (width, height), 'purple')
