@@ -140,3 +140,5 @@ def test_load_from_file() -> None:
                       PlayerCharacter)
     assert isinstance(list(state.environment.map.get_objects(MapCoordinates(37, 35)))[0],
                       Mob)
+
+    assert len(state.environment.enemies) == 2
