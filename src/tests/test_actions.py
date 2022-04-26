@@ -212,21 +212,19 @@ def test_menu_actions(state: GameState, actions: ActionManager) -> None:
 
 
 def test_confusion() -> None:
+    random.seed(2)
     normal = Mob(1, Stats(2, 2), 1, PassiveBehaviour())
     confused = ConfusedMob(normal, 5, lambda: None)
-    # fixing randomness
-    ConfusedMob._get_random_coordinates = lambda _, x: x[rand_index]  # pylint: disable=(protected-access, W0631)
     geomap = Map(10, 10)
     geomap.add_object(MapCoordinates(5, 5), confused)
     player = PlayerCharacter(Stats(2, 0))
-    random_indices = [3, 0, 2, 1, 0]
     expected_track = [
-        MapCoordinates(5, 6),
-        MapCoordinates(4, 6),
-        MapCoordinates(5, 6),
-        MapCoordinates(5, 5),
         MapCoordinates(4, 5),
+        MapCoordinates(3, 5),
+        MapCoordinates(2, 5),
+        MapCoordinates(3, 5),
+        MapCoordinates(3, 4),
     ]
-    for rand_index, coordinate in zip(random_indices, expected_track):
+    for coordinate in expected_track:
         confused.act(geomap, player)
         assert geomap.get_coordinates(confused) == coordinate
