@@ -122,7 +122,7 @@ def test_player_attack(state: GameState, actions: ActionManager) -> None:
 
     assert geomap.get_coordinates(player) == MapCoordinates(1, 1)
 
-    actions.get_action(Key.W, state)(state)
+    actions.get_action(Key.S, state)(state)
     assert geomap.get_coordinates(player) == MapCoordinates(1, 0)
 
     actions.get_action(Key.A, state)(state)
