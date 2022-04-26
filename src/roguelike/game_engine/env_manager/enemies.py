@@ -84,9 +84,15 @@ class ConfusedMob(NPC):
     def _get_normal(self) -> NPC:
         return self._normal
 
+    @staticmethod
+    def _get_random_coordinates(
+            possible_coordinates: tp.Tuple[MapCoordinates],
+    ) -> MapCoordinates:
+        return possible_coordinates[randrange(len(possible_coordinates))]
+
     def _act_confused(self, geomap: Map, coordinates: MapCoordinates) -> None:
         possible_coordinates = geomap.get_neighbours(coordinates)
-        new_coordinates = possible_coordinates[randrange(len(possible_coordinates))]
+        new_coordinates = self._get_random_coordinates(possible_coordinates)
         items = geomap.get_objects(new_coordinates)
 
         if Obstacle() in items:

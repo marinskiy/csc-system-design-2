@@ -98,7 +98,7 @@ def test_player_attack(state: GameState, actions: ActionManager) -> None:
         assert isinstance(new_enemy, ConfusedMob)
         new_enemy.act(geomap, player)
 
-    assert (enemy, ) == geomap.get_objects(MapCoordinates(0, 0))
+    assert (enemy,) == geomap.get_objects(MapCoordinates(0, 0))
     assert not enemy.is_dead()
 
     actions.get_action(Key.A, state)(state)
@@ -115,7 +115,7 @@ def test_take_treasure(state: GameState, actions: ActionManager) -> None:
     inventory = state.inventory
     helmet, boots = state.environment.world_objects[2:]
 
-    assert inventory.get_treasures() == (boots, )
+    assert inventory.get_treasures() == (boots,)
 
     actions.get_action(Key.E, state)(state)
     assert inventory.get_treasures() == (boots,)
@@ -127,7 +127,7 @@ def test_take_treasure(state: GameState, actions: ActionManager) -> None:
     assert set(geomap.get_objects(coordinates)) == {player, helmet}
     actions.get_action(Key.E, state)(state)
     assert set(inventory.get_treasures()) == {boots, helmet}
-    assert geomap.get_objects(coordinates) == (player, )
+    assert geomap.get_objects(coordinates) == (player,)
 
 
 def test_inventory_actions(state: GameState, actions: ActionManager) -> None:
@@ -168,14 +168,21 @@ def test_menu_actions(state: GameState, actions: ActionManager) -> None:
 
 
 def test_confusion() -> None:
-    random.seed(5)
     normal = Mob(1, Stats(2, 2), 1, PassiveBehaviour())
     confused = ConfusedMob(normal, 5, lambda: None)
+    # fixing randomness
+    ConfusedMob._get_random_coordinates = lambda _, x: x[rand_index]  # pylint: disable=(protected-access, W0631)
     geomap = Map(10, 10)
     geomap.add_object(MapCoordinates(5, 5), confused)
     player = PlayerCharacter(Stats(2, 0))
-    coordinates = [
-        MapCoordinates(5, 4), MapCoordinates(5, 3), MapCoordinates(4, 3), MapCoordinates(4, 4), MapCoordinates(5, 4)]
-    for c in coordinates:
+    random_indices = [3, 0, 2, 1, 0]
+    expected_track = [
+        MapCoordinates(5, 4),
+        MapCoordinates(4, 4),
+        MapCoordinates(5, 4),
+        MapCoordinates(5, 5),
+        MapCoordinates(4, 5),
+    ]
+    for rand_index, coordinate in zip(random_indices, expected_track):
         confused.act(geomap, player)
-        assert c == geomap.get_coordinates(confused)
+        assert geomap.get_coordinates(confused) == coordinate
