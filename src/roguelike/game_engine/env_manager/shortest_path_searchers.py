@@ -1,3 +1,4 @@
+"""Implements algorithms for searching path between two points in a grid world"""
 from __future__ import annotations
 
 import heapq
@@ -20,6 +21,7 @@ class Coordinates(tp.Protocol):
 
 
 class PriorityQueue(tp.Generic[T]):
+    """Standard priority queue"""
     def __init__(self) -> None:
         self.elements: tp.List[tp.Tuple[float, T]] = []
 
