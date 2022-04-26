@@ -24,6 +24,16 @@ class MapCoordinates:
     def __hash__(self) -> int:
         return hash((self.x, self.y))
 
+    def __lt__(self, other: tp.Any) -> bool:
+        if isinstance(other, MapCoordinates):
+            if self.x < other.x:
+                return True
+            if self.y < other.y:
+                return True
+            return False
+        else:
+            raise NotImplementedError
+
     @property
     def left(self) -> MapCoordinates:
         return MapCoordinates(self.x - 1, self.y)
