@@ -221,9 +221,9 @@ def test_confusion() -> None:
     player = PlayerCharacter(Stats(2, 0))
     random_indices = [3, 0, 2, 1, 0]
     expected_track = [
-        MapCoordinates(5, 4),
-        MapCoordinates(4, 4),
-        MapCoordinates(5, 4),
+        MapCoordinates(5, 6),
+        MapCoordinates(4, 6),
+        MapCoordinates(5, 6),
         MapCoordinates(5, 5),
         MapCoordinates(4, 5),
     ]
