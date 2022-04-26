@@ -329,21 +329,21 @@ def test_player_character_levels_up() -> None:
 
     # test lvl up
     assert player_character.level == 1
-    exp_needed = player_character._calculate_exp_needed_for_new_level()
+    exp_needed = player_character._calculate_exp_needed_for_new_level()  # pylint: disable=protected-access
     player_character.gain_experience(exp_needed)
     assert player_character.level == 2
-    assert player_character._experience == 0
+    assert player_character._experience == 0  # pylint: disable=protected-access
 
     # test incremental exp gaining
-    exp_needed = player_character._calculate_exp_needed_for_new_level()
+    exp_needed = player_character._calculate_exp_needed_for_new_level()  # pylint: disable=protected-access
     player_character.gain_experience(exp_needed - 1)
     assert player_character.level == 2
     player_character.gain_experience(1)
     assert player_character.level == 3
-    assert player_character._experience == 0
+    assert player_character._experience == 0  # pylint: disable=protected-access
 
     # test rest of exp transitions properly
-    exp_needed = player_character._calculate_exp_needed_for_new_level()
+    exp_needed = player_character._calculate_exp_needed_for_new_level()  # pylint: disable=protected-access
     player_character.gain_experience(exp_needed + 1)
     assert player_character.level == 4
-    assert player_character._experience == 1
+    assert player_character._experience == 1  # pylint: disable=protected-access
