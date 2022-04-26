@@ -45,29 +45,73 @@ def test_switch_mode(state: GameState, actions: ActionManager) -> None:
     assert state.mode == Mode.MAP
 
 
-def test_move_player(state: GameState, actions: ActionManager) -> None:
-    geomap = state.environment.map
-    player = state.player
+def test_player_moves_everywhere_on_free_map_and_dont_cross_borders(
+        actions: ActionManager,
+) -> None:
+    player = PlayerCharacter(Stats(1, 1))
+    geomap = Map(3, 3)
+    geomap.add_object(MapCoordinates(1, 1), player)
+    state = GameState(
+        Mode.MAP,
+        Environment(geomap, [], set()),
+        Inventory([]),
+        player,
+    )
 
     assert geomap.get_coordinates(player) == MapCoordinates(1, 1)
+    for key, target_coordinates in (
+            (Key.W, MapCoordinates(1, 2)),
+            (Key.W, MapCoordinates(1, 2)),
+            (Key.A, MapCoordinates(0, 2)),
+            (Key.A, MapCoordinates(0, 2)),
+            (Key.S, MapCoordinates(0, 1)),
+            (Key.A, MapCoordinates(0, 1)),
+            (Key.S, MapCoordinates(0, 0)),
+            (Key.S, MapCoordinates(0, 0)),
+            (Key.A, MapCoordinates(0, 0)),
+            (Key.D, MapCoordinates(1, 0)),
+            (Key.S, MapCoordinates(1, 0)),
+            (Key.D, MapCoordinates(2, 0)),
+            (Key.S, MapCoordinates(2, 0)),
+            (Key.D, MapCoordinates(2, 0)),
+            (Key.W, MapCoordinates(2, 1)),
+            (Key.D, MapCoordinates(2, 1)),
+            (Key.W, MapCoordinates(2, 2)),
+            (Key.D, MapCoordinates(2, 2)),
+            (Key.W, MapCoordinates(2, 2)),
+    ):
+        actions.get_action(key, state)(state)
+        assert geomap.get_coordinates(player) == target_coordinates
 
-    actions.get_action(Key.S, state)(state)
+
+def test_player_does_not_move_through_the_obstacles(
+        actions: ActionManager,
+) -> None:
+    player = PlayerCharacter(Stats(1, 1))
+    geomap = Map(3, 3)
+    player_initial_coordinates = MapCoordinates(1, 1)
+    geomap.add_object(player_initial_coordinates, player)
+    geomap.add_object(player_initial_coordinates.left, Obstacle())
+    geomap.add_object(player_initial_coordinates.right, Obstacle())
+    geomap.add_object(player_initial_coordinates.up, Obstacle())
+    geomap.add_object(player_initial_coordinates.down, Obstacle())
+    state = GameState(
+        Mode.MAP,
+        Environment(geomap, [], set()),
+        Inventory([]),
+        player,
+    )
+
     assert geomap.get_coordinates(player) == MapCoordinates(1, 1)
-
-    actions.get_action(Key.A, state)(state)
     assert geomap.get_coordinates(player) == MapCoordinates(1, 1)
-
-    actions.get_action(Key.W, state)(state)
-    assert geomap.get_coordinates(player) == MapCoordinates(1, 0)
-
-    actions.get_action(Key.D, state)(state)
-    assert geomap.get_coordinates(player) == MapCoordinates(2, 0)
-
-    actions.get_action(Key.S, state)(state)
-    assert geomap.get_coordinates(player) == MapCoordinates(2, 1)
-
-    actions.get_action(Key.A, state)(state)
-    assert geomap.get_coordinates(player) == MapCoordinates(1, 1)
+    for key, target_coordinates in (
+            (Key.W, MapCoordinates(1, 1)),
+            (Key.S, MapCoordinates(1, 1)),
+            (Key.A, MapCoordinates(1, 1)),
+            (Key.D, MapCoordinates(1, 1)),
+    ):
+        actions.get_action(key, state)(state)
+        assert geomap.get_coordinates(player) == target_coordinates
 
 
 def test_player_attack(state: GameState, actions: ActionManager) -> None:
