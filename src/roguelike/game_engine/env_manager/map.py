@@ -4,9 +4,11 @@ from __future__ import annotations
 import typing as tp
 from dataclasses import dataclass
 from itertools import product
+
 from PIL import Image
 
 from roguelike.game_engine.env_manager.map_objects_storage import MapObject
+from roguelike.game_engine.env_manager.shortest_path_searchers import search_using_a_star
 from roguelike.ui.drawable import Drawable
 
 
@@ -163,3 +165,13 @@ class Map(Drawable):
         if coordinates.y < self._height - 1:
             valid_neighbours.append(coordinates.up)
         return tuple(valid_neighbours)
+
+    def get_distance(self, object_first: MapObject, object_second: MapObject) -> int:
+        coordinates_first = self.get_coordinates(object_first)
+        if coordinates_first is None:
+            raise ValueError(f'Can\'t find {object_first}')
+        coordinates_second = self.get_coordinates(object_second)
+        if coordinates_second is None:
+            raise ValueError(f'Can\'t find {object_second}')
+        _, distance_to_coordinates = search_using_a_star(self, coordinates_first, coordinates_second)
+        return distance_to_coordinates[coordinates_second]
