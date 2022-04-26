@@ -44,11 +44,11 @@ class MapCoordinates:
 
     @property
     def up(self) -> MapCoordinates:
-        return MapCoordinates(self.x, self.y - 1)
+        return MapCoordinates(self.x, self.y + 1)
 
     @property
     def down(self) -> MapCoordinates:
-        return MapCoordinates(self.x, self.y + 1)
+        return MapCoordinates(self.x, self.y - 1)
 
 
 class MapCell:
