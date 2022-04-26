@@ -10,19 +10,24 @@ from .map_objects_storage import Creature, Stats, Obstacle, PlayerCharacter
 
 
 class Behaviour:
-    pass
+    @abstractmethod
+    def act(self, actor: 'Mob', geomap: Map, player: PlayerCharacter) -> None:
+        pass
 
 
 class AggressiveBehaviour(Behaviour):
-    pass
+    def act(self, actor: 'Mob', geomap: Map, player: PlayerCharacter) -> None:
+        pass
 
 
 class CowardlyBehaviour(Behaviour):
-    pass
+    def act(self, actor: 'Mob', geomap: Map, player: PlayerCharacter) -> None:
+        pass
 
 
 class PassiveBehaviour(Behaviour):
-    pass
+    def act(self, actor: 'Mob', geomap: Map, player: PlayerCharacter) -> None:
+        pass
 
 
 class BehaviourFactory:
@@ -65,7 +70,7 @@ class Mob(NPC):
         self._behaviour = behaviour
 
     def act(self, geomap: Map, player: PlayerCharacter) -> None:
-        pass
+        self._behaviour.act(self, geomap, player)
 
     def draw(self, width: int, height: int) -> Image:
         return Image.new('RGB', (width, height), 'red')
