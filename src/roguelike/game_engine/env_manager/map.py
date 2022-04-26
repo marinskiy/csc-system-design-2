@@ -139,11 +139,15 @@ class Map(Drawable):
         assert width % self._width == height % self._height
         assert width // self._width == height // self._height
         map_image = Image.new('RGB', (width, height))
-        for i in range(self._width):
-            for j in range(self._height):
-                map_coordinates = MapCoordinates(i, j)
+        for x_coordinate in range(self._width):
+            for y_coordinate in range(self._height):
+                map_coordinates = MapCoordinates(x_coordinate, y_coordinate)
                 map_image.paste(
-                    self._draw_map_cell(map_coordinates, cell_size), (i * cell_size, j * cell_size))
+                    self._draw_map_cell(map_coordinates, cell_size),
+                    (x_coordinate * cell_size,
+                     # this is done due to img rendering from upper left conner
+                     (self._height - y_coordinate - 1) * cell_size),
+                )
         return map_image
 
     def get_width(self) -> int:
