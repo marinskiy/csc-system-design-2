@@ -347,3 +347,19 @@ def test_player_character_levels_up() -> None:
     player_character.gain_experience(exp_needed + 1)
     assert player_character.level == 4
     assert player_character._experience == 1  # pylint: disable=protected-access
+
+
+@pytest.mark.parametrize(
+    ['coord_first', 'coord_second'],
+    [
+        [MapCoordinates(0, 0), MapCoordinates(1, 0)],
+        [MapCoordinates(0, 0), MapCoordinates(0, 1)],
+        [MapCoordinates(0, 0), MapCoordinates(1, 1)],
+        [MapCoordinates(1, 0), MapCoordinates(0, 1)],
+    ]
+)
+def test_coordinates_are_compared_correctly(
+        coord_first: MapCoordinates,
+        coord_second: MapCoordinates,
+) -> None:
+    assert coord_first < coord_second
