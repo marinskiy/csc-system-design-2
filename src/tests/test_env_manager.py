@@ -60,8 +60,8 @@ def test_treasure_creates_properly() -> None:
 
 def test_coordinates_neighbours(map_with_obstacle: Map) -> None:
     coordinates = MapCoordinates(0, 0)
-    assert coordinates.up == MapCoordinates(0, -1)
-    assert coordinates.down == MapCoordinates(0, 1)
+    assert coordinates.up == MapCoordinates(0, 1)
+    assert coordinates.down == MapCoordinates(0, -1)
     assert coordinates.left == MapCoordinates(-1, 0)
     assert coordinates.right == MapCoordinates(1, 0)
 
