@@ -2,6 +2,7 @@
 import random
 import typing as tp
 from abc import abstractmethod
+from enum import Enum, auto
 
 from PIL import Image
 
@@ -9,25 +10,91 @@ from .map import MapCoordinates, Map
 from .map_objects_storage import Creature, Stats, Obstacle, PlayerCharacter
 
 
+class CreatureMove(Enum):
+    MOVE_AWAY = auto()
+    MOVE_CLOSER = auto()
+
+
+def _check_is_possible_coord(target_coords: MapCoordinates, geomap: Map, banned_types: tp.List[tp.Any]) -> bool:
+    items = geomap.get_objects(target_coords)
+    for item in items:
+        for banned_type in banned_types:
+            if isinstance(item, banned_type):
+                return False
+    return True
+
+
+def _get_all_possible_creature_move_coords(actor_coords: MapCoordinates, geomap: Map,
+                                           banned_types: tp.List[tp.Any]) -> tp.List[MapCoordinates]:
+    possible_coordinates: tp.List[MapCoordinates] = []
+
+    neighbour_coords_list = geomap.get_neighbours(actor_coords)
+    for neighbour_coords in neighbour_coords_list:
+        if _check_is_possible_coord(neighbour_coords, geomap, banned_types):
+            possible_coordinates.append(neighbour_coords)
+
+    return possible_coordinates
+
+
+def _get_possible_creature_moves(move_type: CreatureMove, actor: 'Mob',
+                                 geomap: Map, player: PlayerCharacter) -> tp.List[MapCoordinates]:
+    actor_coords = geomap.get_coordinates(actor)
+    if not isinstance(actor_coords, MapCoordinates):
+        raise ValueError('Actor is not on the map')
+    player_coords = geomap.get_coordinates(player)
+    if not isinstance(player_coords, MapCoordinates):
+        raise ValueError('Player is not on the map')
+    distance = geomap.get_distance_between_objects(actor, player)
+    all_possible_moves = _get_all_possible_creature_move_coords(actor_coords, geomap, [Obstacle, NPC])
+
+    if move_type == CreatureMove.MOVE_AWAY:
+        return [coord for coord in all_possible_moves if
+                geomap.get_distance_between_coordinates(coord, player_coords) > distance]
+    if move_type == CreatureMove.MOVE_CLOSER:
+        return [coord for coord in all_possible_moves if
+                geomap.get_distance_between_coordinates(coord, player_coords) < distance]
+    return []
+
+
 class Behaviour:
-    @abstractmethod
+    """Class that is responsible for mob's behaviour"""
+
+    @staticmethod
+    def _check_player_in_action_radius(actor: 'Mob', geomap: Map, player: PlayerCharacter) -> bool:
+        distance = geomap.get_distance_between_objects(actor, player)
+        if distance > actor.action_radius:
+            return False
+        return True
+
     def act(self, actor: 'Mob', geomap: Map, player: PlayerCharacter) -> None:
+        if not self._check_player_in_action_radius(actor, geomap, player):
+            return
+
+        possible_moves = self._get_possible_moves(actor, geomap, player)
+        if len(possible_moves) == 0:
+            return
+
+        new_coordinates = random.choice(possible_moves)
+        geomap.move_to(actor, new_coordinates)
+
+    @abstractmethod
+    def _get_possible_moves(self, actor: 'Mob', geomap: Map, player: PlayerCharacter) -> tp.List[MapCoordinates]:
         pass
 
 
 class AggressiveBehaviour(Behaviour):
-    def act(self, actor: 'Mob', geomap: Map, player: PlayerCharacter) -> None:
-        pass
+    def _get_possible_moves(self, actor: 'Mob', geomap: Map, player: PlayerCharacter) -> tp.List[MapCoordinates]:
+        return _get_possible_creature_moves(CreatureMove.MOVE_CLOSER, actor, geomap, player)
 
 
 class CowardlyBehaviour(Behaviour):
-    def act(self, actor: 'Mob', geomap: Map, player: PlayerCharacter) -> None:
-        pass
+    def _get_possible_moves(self, actor: 'Mob', geomap: Map, player: PlayerCharacter) -> tp.List[MapCoordinates]:
+        return _get_possible_creature_moves(CreatureMove.MOVE_AWAY, actor, geomap, player)
 
 
 class PassiveBehaviour(Behaviour):
-    def act(self, actor: 'Mob', geomap: Map, player: PlayerCharacter) -> None:
-        pass
+    def _get_possible_moves(self, actor: 'Mob', geomap: Map, player: PlayerCharacter) -> tp.List[MapCoordinates]:
+        return []
 
 
 class BehaviourFactory:
@@ -50,6 +117,7 @@ class BehaviourFactory:
 
 class NPC(Creature):
     """The parent class for enemies"""
+
     def __init__(self, level: int, stats: Stats, radius: int) -> None:
         super().__init__(level, stats)
         self._action_radius = radius
@@ -65,6 +133,7 @@ class NPC(Creature):
 
 class Mob(NPC):
     """Normal enemy"""
+
     def __init__(self, level: int, stats: Stats, radius: int, behaviour: Behaviour) -> None:
         super().__init__(level, stats, radius)
         self._behaviour = behaviour
@@ -78,6 +147,7 @@ class Mob(NPC):
 
 class ConfusedMob(NPC):
     """Enemy in a confused state"""
+
     def __init__(self, normal_mob: NPC, timeout: int, callback: tp.Callable[[], None]) -> None:
         super().__init__(1, normal_mob.stats, 0)
         if isinstance(normal_mob, ConfusedMob):
@@ -95,10 +165,8 @@ class ConfusedMob(NPC):
         new_coordinates = random.choice(possible_coordinates)
         items = geomap.get_objects(new_coordinates)
 
-        if Obstacle() in items:
-            return
         for item in items:
-            if isinstance(item, Creature):
+            if isinstance(item, (Creature, Obstacle)):
                 return
         geomap.move_to(self, new_coordinates)
 
