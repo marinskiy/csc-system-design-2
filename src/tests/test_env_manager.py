@@ -379,20 +379,20 @@ def test_map_calculates_distance_properly(
     obstacle_second = Obstacle()
     map_.add_object(MapCoordinates(0, 0), obstacle_first)
     map_.add_object(MapCoordinates(9, 9), obstacle_second)
-    assert map_.get_distance(obstacle_first, obstacle_second) == 18
+    assert map_.get_distance_between_objects(obstacle_first, obstacle_second) == 18
 
     map_.move_to(obstacle_second, MapCoordinates(0, 0))
-    assert map_.get_distance(obstacle_first, obstacle_second) == 0
+    assert map_.get_distance_between_objects(obstacle_first, obstacle_second) == 0
 
     map_.move_to(obstacle_second, MapCoordinates(0, 1))
-    assert map_.get_distance(obstacle_first, obstacle_second) == 1
+    assert map_.get_distance_between_objects(obstacle_first, obstacle_second) == 1
 
     map_.move_to(obstacle_second, MapCoordinates(1, 1))
-    assert map_.get_distance(obstacle_first, obstacle_second) == 2
+    assert map_.get_distance_between_objects(obstacle_first, obstacle_second) == 2
 
     map_.move_to(obstacle_second, MapCoordinates(1, 2))
-    assert map_.get_distance(obstacle_first, obstacle_second) == 3
+    assert map_.get_distance_between_objects(obstacle_first, obstacle_second) == 3
 
     map_.move_to(obstacle_second, MapCoordinates(1, 2))
-    assert map_.get_distance(obstacle_first, obstacle_second) == \
-           map_.get_distance(obstacle_second, obstacle_first)
+    assert map_.get_distance_between_objects(obstacle_first, obstacle_second) == \
+           map_.get_distance_between_objects(obstacle_second, obstacle_first)

@@ -170,12 +170,16 @@ class Map(Drawable):
             valid_neighbours.append(coordinates.up)
         return tuple(valid_neighbours)
 
-    def get_distance(self, object_first: MapObject, object_second: MapObject) -> int:
+    def get_distance_between_coordinates(self, coordinates_first: MapCoordinates,
+                                         coordinates_second: MapCoordinates) -> int:
+        _, distance_to_coordinates = search_using_a_star(self, coordinates_first, coordinates_second)
+        return distance_to_coordinates[coordinates_second]
+
+    def get_distance_between_objects(self, object_first: MapObject, object_second: MapObject) -> int:
         coordinates_first = self.get_coordinates(object_first)
         if coordinates_first is None:
             raise ValueError(f'Can\'t find {object_first}')
         coordinates_second = self.get_coordinates(object_second)
         if coordinates_second is None:
             raise ValueError(f'Can\'t find {object_second}')
-        _, distance_to_coordinates = search_using_a_star(self, coordinates_first, coordinates_second)
-        return distance_to_coordinates[coordinates_second]
+        return self.get_distance_between_coordinates(coordinates_first, coordinates_second)

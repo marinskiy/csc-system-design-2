@@ -6,7 +6,7 @@ import json
 import typing as tp
 
 from roguelike.game_engine.env_manager import MapCoordinates, Map, Environment, Inventory, Stats, MapObject
-from roguelike.game_engine.env_manager.enemies import Mob, BehaviourFactory
+from roguelike.game_engine.env_manager.enemies import Mob, BehaviourFactory, NPC
 from roguelike.game_engine.env_manager.map_objects_storage import Obstacle, Treasure, PlayerCharacter, Creature
 from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Mode
 
@@ -111,7 +111,7 @@ class GameLoader:
             world_objects.append(world_object)
             if isinstance(world_object, PlayerCharacter):
                 player = world_object
-            if isinstance(world_object, Creature):
+            if isinstance(world_object, NPC):
                 enemies.add(world_object)
             geomap.add_object(coords, world_object)
 
