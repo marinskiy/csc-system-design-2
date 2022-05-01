@@ -15,13 +15,12 @@ class CreatureMove(Enum):
     MOVE_CLOSER = auto()
 
 
-def _check_is_possible_coord(target_coords: MapCoordinates, geomap: Map, banned_types: tp.List[tp.Any]) -> bool:
+def _coord_has_objects_of_types(target_coords: MapCoordinates, geomap: Map, target_types: tp.List[tp.Any]) -> bool:
     items = geomap.get_objects(target_coords)
     for item in items:
-        for banned_type in banned_types:
-            if isinstance(item, banned_type):
-                return False
-    return True
+        if isinstance(item, tuple(target_types)):
+            return True
+    return False
 
 
 def _get_all_possible_creature_move_coords(actor_coords: MapCoordinates, geomap: Map,
@@ -30,7 +29,7 @@ def _get_all_possible_creature_move_coords(actor_coords: MapCoordinates, geomap:
 
     neighbour_coords_list = geomap.get_neighbours(actor_coords)
     for neighbour_coords in neighbour_coords_list:
-        if _check_is_possible_coord(neighbour_coords, geomap, banned_types):
+        if not _coord_has_objects_of_types(neighbour_coords, geomap, banned_types):
             possible_coordinates.append(neighbour_coords)
 
     return possible_coordinates
@@ -56,6 +55,20 @@ def _get_possible_creature_moves(move_type: CreatureMove, actor: 'Mob',
     return []
 
 
+def _attack_player(actor: 'Mob', player: PlayerCharacter) -> None:
+    player.take_damage(actor.attack_power)
+
+
+def _move_creature_to(actor: 'Mob', geomap: Map, player: PlayerCharacter, new_coordinates) -> None:
+    if _coord_has_objects_of_types(new_coordinates, geomap, [Obstacle, NPC]):
+        return
+    if _coord_has_objects_of_types(new_coordinates, geomap, [PlayerCharacter]):
+        _attack_player(actor, player)
+        return
+
+    geomap.move_to(actor, new_coordinates)
+
+
 class Behaviour:
     """Class that is responsible for mob's behaviour"""
 
@@ -75,7 +88,7 @@ class Behaviour:
             return
 
         new_coordinates = random.choice(possible_moves)
-        geomap.move_to(actor, new_coordinates)
+        _move_creature_to(actor, geomap, player, new_coordinates)
 
     @abstractmethod
     def _get_possible_moves(self, actor: 'Mob', geomap: Map, player: PlayerCharacter) -> tp.List[MapCoordinates]:
@@ -163,11 +176,8 @@ class ConfusedMob(NPC):
     def _act_confused(self, geomap: Map, coordinates: MapCoordinates) -> None:
         possible_coordinates = geomap.get_neighbours(coordinates)
         new_coordinates = random.choice(possible_coordinates)
-        items = geomap.get_objects(new_coordinates)
-
-        for item in items:
-            if isinstance(item, (Creature, Obstacle)):
-                return
+        if _coord_has_objects_of_types(new_coordinates, geomap, [Creature, Obstacle]):
+            return
         geomap.move_to(self, new_coordinates)
 
     def act(self, geomap: Map, player: PlayerCharacter) -> None:

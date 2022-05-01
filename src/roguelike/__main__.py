@@ -41,7 +41,8 @@ if __name__ == "__main__":
                     current_state.environment.map.get_height())
     drawer.draw(current_state)
 
-    while current_state.is_running and current_state.player.stats.health:
+    while current_state.is_running and current_state.player.stats.health > 0:
+        drawer.draw(current_state)
         key = KeyboardInterpreter.get_next_key()
         current_state = loop.run_game_turn(key)
-        drawer.draw(current_state)
+
