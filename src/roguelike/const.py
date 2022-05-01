@@ -1,0 +1,7 @@
+"""Roguelike constants"""
+
+INVENTORY_WIDTH = 3
+INVENTORY_HEIGHT = 2
+
+MAP_TILE_SIZE = 16
+INVENTORY_TILE_SIZE = 96
