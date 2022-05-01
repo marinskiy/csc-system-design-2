@@ -59,7 +59,7 @@ def _attack_player(actor: 'Mob', player: PlayerCharacter) -> None:
     player.take_damage(actor.attack_power)
 
 
-def _move_creature_to(actor: 'Mob', geomap: Map, player: PlayerCharacter, new_coordinates) -> None:
+def _move_creature_to(actor: 'Mob', geomap: Map, player: PlayerCharacter, new_coordinates: MapCoordinates) -> None:
     if _coord_has_objects_of_types(new_coordinates, geomap, [Obstacle, NPC]):
         return
     if _coord_has_objects_of_types(new_coordinates, geomap, [PlayerCharacter]):

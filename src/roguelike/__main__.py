@@ -45,4 +45,3 @@ if __name__ == "__main__":
         drawer.draw(current_state)
         key = KeyboardInterpreter.get_next_key()
         current_state = loop.run_game_turn(key)
-
