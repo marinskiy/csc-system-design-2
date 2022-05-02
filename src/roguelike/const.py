@@ -8,4 +8,4 @@ INVENTORY_HEIGHT = 2
 MAP_TILE_SIZE = 20
 INVENTORY_TILE_SIZE = 96
 
-IMAGE_RESOURCES_DIR = os.path.join(os.getcwd(), 'src', 'assets', 'images')
+IMAGE_RESOURCES_DIR = os.path.join(os.path.dirname(__file__), "../assets/images")

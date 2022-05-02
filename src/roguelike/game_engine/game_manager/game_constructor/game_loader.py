@@ -7,7 +7,7 @@ import typing as tp
 
 from roguelike.game_engine.env_manager import MapCoordinates, Map, Environment, Inventory, Stats, MapObject
 from roguelike.game_engine.env_manager.enemies import Mob, BehaviourFactory, NPC
-from roguelike.game_engine.env_manager.map_objects_storage import Obstacle, Treasure, PlayerCharacter, Creature
+from roguelike.game_engine.env_manager.map_objects_storage import Obstacle, Treasure, PlayerCharacter
 from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Mode
 
 
@@ -97,13 +97,13 @@ class GameLoader:
         return world_object, coords
 
     @staticmethod
-    def _load_world(value: tp.Dict[str, tp.Any]) -> tp.Tuple[Map, tp.List[tp.Any], tp.Set[Creature], PlayerCharacter]:
+    def _load_world(value: tp.Dict[str, tp.Any]) -> tp.Tuple[Map, tp.List[tp.Any], tp.Set[NPC], PlayerCharacter]:
         if not check_dict_fields(value, ["map", "objects"]) or not isinstance(value["objects"], list):
             raise ValueError("Invalid json format")
 
         geomap = GameLoader._load_map(value["map"])
         world_objects: tp.List[MapObject] = []
-        enemies: tp.Set[Creature] = set()
+        enemies: tp.Set[NPC] = set()
 
         for map_object_json in value["objects"]:
             world_object, coords = GameLoader._load_world_object(map_object_json)

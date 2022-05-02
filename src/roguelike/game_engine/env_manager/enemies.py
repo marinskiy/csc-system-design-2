@@ -127,8 +127,6 @@ class BehaviourFactory:
     def get_behaviour(cls, key: str) -> Behaviour:
         return cls._behaviours[key]
 
-from roguelike.ui.drawable import drawable
-
 
 class NPC(Creature):
     """The parent class for enemies"""
