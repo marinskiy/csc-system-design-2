@@ -100,7 +100,7 @@ def test_passive_behaviour_within_action_radius(map_with_obstacle_and_player: tp
 
     passive_mob.act(geomap, player)
 
-    assert geomap.get_coordinates(passive_mob) in [MapCoordinates(1, 0), MapCoordinates(0, 1)]
+    assert geomap.get_coordinates(passive_mob) == MapCoordinates(1, 1)
     assert player.stats.health == 100
 
 
