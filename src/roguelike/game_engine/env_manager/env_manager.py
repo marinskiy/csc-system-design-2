@@ -7,7 +7,7 @@ from PIL import Image
 
 from roguelike import const
 from roguelike.game_engine.env_manager.map import Map
-from roguelike.game_engine.env_manager.map_objects_storage import Treasure, MapObject, Stats
+from roguelike.game_engine.env_manager.map_objects_storage import Treasure, MapObject, Stats, Creature
 from roguelike.ui.drawable import Drawable
 
 
@@ -91,3 +91,4 @@ class Inventory:
 class Environment:
     map: Map
     world_objects: tp.List[MapObject]
+    enemies: tp.Set[Creature]

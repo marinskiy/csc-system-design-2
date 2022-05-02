@@ -12,8 +12,8 @@
       ],
       "settings": {
         "stats": {
-          "health": 100.0,
-          "attack": 100.0
+          "health": 100,
+          "attack": 100
         }
       }
     },
@@ -42,8 +42,8 @@
       "settings": {
         "name": "Super Helmet",
         "stats": {
-          "health": 10.0,
-          "attack": 0.0
+          "health": 10,
+          "attack": 0
         }
       }
     },
@@ -56,8 +56,24 @@
       "settings": {
         "name": "Trashy boots",
         "stats": {
-          "health": 0.0,
-          "attack": -10.0
+          "health": 0,
+          "attack": -10
+        }
+      }
+    },
+    {
+      "type": "mob",
+      "pos": [
+        37,
+        35
+      ],
+      "settings": {
+        "level": 1,
+        "radius": 7,
+        "behaviour": "aggressive",
+        "stats": {
+          "health": 30,
+          "attack": 10
         }
       }
     }

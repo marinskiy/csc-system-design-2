@@ -1,4 +1,5 @@
 """Contains all classes to manage Map entity"""
+from __future__ import annotations
 
 import typing as tp
 from dataclasses import dataclass
@@ -7,6 +8,7 @@ from itertools import product
 from PIL import Image
 
 from roguelike.game_engine.env_manager.map_objects_storage import MapObject
+from roguelike.game_engine.env_manager.shortest_path_searchers import search_using_a_star
 from roguelike.ui.drawable import Drawable
 
 
@@ -24,11 +26,36 @@ class MapCoordinates:
     def __hash__(self) -> int:
         return hash((self.x, self.y))
 
+    def __lt__(self, other: tp.Any) -> bool:
+        if isinstance(other, MapCoordinates):
+            if self.x < other.x:
+                return True
+            if self.y < other.y:
+                return True
+            return False
+        else:
+            raise NotImplementedError
+
+    @property
+    def left(self) -> MapCoordinates:
+        return MapCoordinates(self.x - 1, self.y)
+
+    @property
+    def right(self) -> MapCoordinates:
+        return MapCoordinates(self.x + 1, self.y)
+
+    @property
+    def up(self) -> MapCoordinates:
+        return MapCoordinates(self.x, self.y + 1)
+
+    @property
+    def down(self) -> MapCoordinates:
+        return MapCoordinates(self.x, self.y - 1)
+
 
 class MapCell:
     """Stores items for given map cell"""
-    # todo: update schema
-    #   new methods: add, remove
+
     def __init__(self) -> None:
         self._items: tp.Set[MapObject] = set()
 
@@ -83,8 +110,6 @@ class Map(Drawable):
         return self._coord_to_cell[coordinates].items
 
     def add_object(self, coordinates: MapCoordinates, map_object: MapObject) -> None:
-        # todo: design
-        #  added coordinates as arg
         if not self._are_valid_coordinates(coordinates):
             return
         if self._is_on_the_map(map_object):
@@ -93,8 +118,6 @@ class Map(Drawable):
         self._map_object_to_coord[map_object] = coordinates
 
     def remove_object(self, map_object: MapObject) -> None:
-        # todo: design
-        #  added coordinates as arg
         if not self._is_on_the_map(map_object):
             return
         coordinates = self._map_object_to_coord.pop(map_object)
@@ -116,11 +139,15 @@ class Map(Drawable):
         assert width % self._width == height % self._height
         assert width // self._width == height // self._height
         map_image = Image.new('RGB', (width, height))
-        for i in range(self._width):
-            for j in range(self._height):
-                map_coordinates = MapCoordinates(i, j)
+        for x_coordinate in range(self._width):
+            for y_coordinate in range(self._height):
+                map_coordinates = MapCoordinates(x_coordinate, y_coordinate)
                 map_image.paste(
-                    self._draw_map_cell(map_coordinates, cell_size), (i * cell_size, j * cell_size))
+                    self._draw_map_cell(map_coordinates, cell_size),
+                    (x_coordinate * cell_size,
+                     # this is done due to img rendering from upper left conner
+                     (self._height - y_coordinate - 1) * cell_size),
+                )
         return map_image
 
     def get_width(self) -> int:
@@ -128,3 +155,31 @@ class Map(Drawable):
 
     def get_height(self) -> int:
         return self._height
+
+    def get_neighbours(
+            self, coordinates: MapCoordinates,
+    ) -> tp.Tuple[MapCoordinates, ...]:
+        valid_neighbours = []
+        if coordinates.x > 0:
+            valid_neighbours.append(coordinates.left)
+        if coordinates.y > 0:
+            valid_neighbours.append(coordinates.down)
+        if coordinates.x < self._width - 1:
+            valid_neighbours.append(coordinates.right)
+        if coordinates.y < self._height - 1:
+            valid_neighbours.append(coordinates.up)
+        return tuple(valid_neighbours)
+
+    def get_distance_between_coordinates(self, coordinates_first: MapCoordinates,
+                                         coordinates_second: MapCoordinates) -> int:
+        _, distance_to_coordinates = search_using_a_star(self, coordinates_first, coordinates_second)
+        return distance_to_coordinates[coordinates_second]
+
+    def get_distance_between_objects(self, object_first: MapObject, object_second: MapObject) -> int:
+        coordinates_first = self.get_coordinates(object_first)
+        if coordinates_first is None:
+            raise ValueError(f'Can\'t find {object_first}')
+        coordinates_second = self.get_coordinates(object_second)
+        if coordinates_second is None:
+            raise ValueError(f'Can\'t find {object_second}')
+        return self.get_distance_between_coordinates(coordinates_first, coordinates_second)

@@ -1,6 +1,6 @@
 """Env manager tests"""
 # pylint: disable=redefined-outer-name
-
+import random
 import typing as tp
 
 import pytest
@@ -56,6 +56,62 @@ def test_treasure_creates_properly() -> None:
     treasure = Treasure(treasure_name, Stats(0, 1))
     assert treasure.name == treasure_name
     assert treasure.stats == Stats(0, 1)
+
+
+def test_coordinates_neighbours(map_with_obstacle: Map) -> None:
+    coordinates = MapCoordinates(0, 0)
+    assert coordinates.up == MapCoordinates(0, 1)
+    assert coordinates.down == MapCoordinates(0, -1)
+    assert coordinates.left == MapCoordinates(-1, 0)
+    assert coordinates.right == MapCoordinates(1, 0)
+
+    coordinates = MapCoordinates(0, 0)
+    proposed_neighbours = map_with_obstacle.get_neighbours(coordinates)
+    assert len(proposed_neighbours) == 2
+    assert coordinates.up in proposed_neighbours
+    assert coordinates.right in proposed_neighbours
+
+    coordinates = MapCoordinates(1, 0)
+    proposed_neighbours = map_with_obstacle.get_neighbours(coordinates)
+    assert len(proposed_neighbours) == 3
+    assert coordinates.up in proposed_neighbours
+    assert coordinates.left in proposed_neighbours
+    assert coordinates.right in proposed_neighbours
+
+    coordinates = MapCoordinates(0, 1)
+    proposed_neighbours = map_with_obstacle.get_neighbours(coordinates)
+    assert len(proposed_neighbours) == 3
+    assert coordinates.up in proposed_neighbours
+    assert coordinates.down in proposed_neighbours
+    assert coordinates.right in proposed_neighbours
+
+    coordinates = MapCoordinates(2, 2)
+    proposed_neighbours = map_with_obstacle.get_neighbours(coordinates)
+    assert len(proposed_neighbours) == 2
+    assert coordinates.down in proposed_neighbours
+    assert coordinates.left in proposed_neighbours
+
+    coordinates = MapCoordinates(1, 2)
+    proposed_neighbours = map_with_obstacle.get_neighbours(coordinates)
+    assert len(proposed_neighbours) == 3
+    assert coordinates.down in proposed_neighbours
+    assert coordinates.left in proposed_neighbours
+    assert coordinates.right in proposed_neighbours
+
+    coordinates = MapCoordinates(2, 1)
+    proposed_neighbours = map_with_obstacle.get_neighbours(coordinates)
+    assert len(proposed_neighbours) == 3
+    assert coordinates.up in proposed_neighbours
+    assert coordinates.down in proposed_neighbours
+    assert coordinates.left in proposed_neighbours
+
+    coordinates = MapCoordinates(1, 1)
+    proposed_neighbours = map_with_obstacle.get_neighbours(coordinates)
+    assert len(proposed_neighbours) == 4
+    assert coordinates.up in proposed_neighbours
+    assert coordinates.down in proposed_neighbours
+    assert coordinates.left in proposed_neighbours
+    assert coordinates.right in proposed_neighbours
 
 
 def test_map_creates_correctly() -> None:
@@ -247,7 +303,7 @@ def test_inventory_calculates_additional_stats_correctly(
 
 
 def test_environment_creates_properly() -> None:
-    Environment(map=Map(1, 1), world_objects=[])
+    Environment(map=Map(1, 1), world_objects=[], enemies=set())
 
 
 def test_player_character_creates_properly() -> None:
@@ -258,7 +314,85 @@ def test_player_character_creates_properly() -> None:
 def test_game_state_creates_properly() -> None:
     GameState(
         mode=Mode.MAP,
-        environment=Environment(Map(1, 1), []),
+        environment=Environment(Map(1, 1), [], set()),
         inventory=Inventory([]),
         player=PlayerCharacter(Stats(1, 0)),
     )
+
+
+def test_player_character_levels_up() -> None:
+    random.seed(42)
+    player_character = PlayerCharacter(Stats(1, 1))
+
+    # test neg exp protection
+    with pytest.raises(ValueError):
+        player_character.gain_experience(-1)
+
+    # test lvl up
+    assert player_character.level == 1
+    exp_needed = player_character._calculate_exp_needed_for_new_level()  # pylint: disable=protected-access
+    player_character.gain_experience(exp_needed)
+    assert player_character.level == 2
+    assert player_character._experience == 0  # pylint: disable=protected-access
+    assert player_character.stats == Stats(2, 2)
+
+    # test incremental exp gaining
+    exp_needed = player_character._calculate_exp_needed_for_new_level()  # pylint: disable=protected-access
+    player_character.gain_experience(exp_needed - 1)
+    assert player_character.level == 2
+    player_character.gain_experience(1)
+    assert player_character.level == 3
+    assert player_character._experience == 0  # pylint: disable=protected-access
+    assert player_character.stats == Stats(2, 3)
+
+    # test rest of exp transitions properly
+    exp_needed = player_character._calculate_exp_needed_for_new_level()  # pylint: disable=protected-access
+    player_character.gain_experience(exp_needed + 1)
+    assert player_character.level == 4
+    assert player_character._experience == 1  # pylint: disable=protected-access
+    assert player_character.stats == Stats(2, 4)
+
+    player_character._level_up()  # pylint: disable=protected-access
+    assert player_character.stats == Stats(3, 5)
+
+
+@pytest.mark.parametrize(
+    ['coord_first', 'coord_second'],
+    [
+        [MapCoordinates(0, 0), MapCoordinates(1, 0)],
+        [MapCoordinates(0, 0), MapCoordinates(0, 1)],
+        [MapCoordinates(0, 0), MapCoordinates(1, 1)],
+        [MapCoordinates(1, 0), MapCoordinates(0, 1)],
+    ]
+)
+def test_coordinates_are_compared_correctly(
+        coord_first: MapCoordinates,
+        coord_second: MapCoordinates,
+) -> None:
+    assert coord_first < coord_second
+
+
+def test_map_calculates_distance_properly(
+) -> None:
+    map_ = Map(10, 10)
+    obstacle_first = Obstacle()
+    obstacle_second = Obstacle()
+    map_.add_object(MapCoordinates(0, 0), obstacle_first)
+    map_.add_object(MapCoordinates(9, 9), obstacle_second)
+    assert map_.get_distance_between_objects(obstacle_first, obstacle_second) == 18
+
+    map_.move_to(obstacle_second, MapCoordinates(0, 0))
+    assert map_.get_distance_between_objects(obstacle_first, obstacle_second) == 0
+
+    map_.move_to(obstacle_second, MapCoordinates(0, 1))
+    assert map_.get_distance_between_objects(obstacle_first, obstacle_second) == 1
+
+    map_.move_to(obstacle_second, MapCoordinates(1, 1))
+    assert map_.get_distance_between_objects(obstacle_first, obstacle_second) == 2
+
+    map_.move_to(obstacle_second, MapCoordinates(1, 2))
+    assert map_.get_distance_between_objects(obstacle_first, obstacle_second) == 3
+
+    map_.move_to(obstacle_second, MapCoordinates(1, 2))
+    assert map_.get_distance_between_objects(obstacle_first, obstacle_second) == \
+           map_.get_distance_between_objects(obstacle_second, obstacle_first)

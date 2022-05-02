@@ -4,16 +4,16 @@ All those objects must inherit from `MapObject` class.
 
 Some objects may have `Stats` for changing owner characteristics.
 """
-
+import random
 import typing as tp
-from abc import abstractmethod
+from abc import abstractmethod, ABCMeta
 from dataclasses import dataclass
 
 from PIL import Image, ImageDraw
 
 from roguelike.ui.drawable import Drawable
 
-__all__ = ['MapObject', 'Treasure', 'Obstacle', 'PlayerCharacter']
+__all__ = ['MapObject', 'Treasure', 'Obstacle', 'PlayerCharacter', 'Creature', 'Stats']
 
 
 class MapObject(Drawable):
@@ -30,7 +30,6 @@ class Obstacle(MapObject):
 @dataclass
 class Stats:
     """Stats class"""
-
     health: int
     attack: int
 
@@ -41,16 +40,60 @@ class Stats:
             raise NotImplementedError('Summation with unknown type.')
 
 
-class PlayerCharacter(MapObject):
-    """Player Object"""
+class Creature(MapObject, metaclass=ABCMeta):
+    """The parent class for all objects capable of action"""
 
-    def __init__(self, stats: Stats) -> None:
+    def __init__(self, level: int, stats: Stats) -> None:
         super().__init__()
         self._stats = stats
+        self._level = level
+
+    @property
+    def attack_power(self) -> int:
+        return self._stats.attack
+
+    def take_damage(self, power: int) -> None:
+        self._stats.health -= power
+
+    @property
+    def level(self) -> int:
+        return self._level
+
+    def is_dead(self) -> int:
+        return self._stats.health < 0
 
     @property
     def stats(self) -> Stats:
         return self._stats
+
+
+class PlayerCharacter(Creature):
+    """Player Object"""
+
+    def __init__(self, stats: Stats) -> None:
+        super().__init__(level=1, stats=stats)
+        self._experience = 0
+
+    def _calculate_exp_needed_for_new_level(self) -> int:
+        return max(self.level + 1, 0)
+
+    def _level_up(self) -> None:
+        self._level += 1
+        possible_stats_increase = (
+            Stats(0, 1),
+            Stats(1, 0),
+            Stats(1, 1),
+        )
+        self._stats += random.choice(possible_stats_increase)
+
+    def gain_experience(self, experience: int) -> None:
+        if experience <= 0:
+            raise ValueError('Cant gain non positive exp.')
+        self._experience += experience
+        exp_needed_for_new_level = self._calculate_exp_needed_for_new_level()
+        if self._experience >= exp_needed_for_new_level:
+            self._experience -= exp_needed_for_new_level
+            self._level_up()
 
     def draw(self, width: int, height: int) -> Image:
         return Image.new('RGB', (width, height), 'purple')

@@ -18,7 +18,7 @@ def generate_game_loop() -> GameLoop:
 
 
 def test_player_makes_move(loop: GameLoop) -> None:
-    new_state = loop.run_game_turn(Key.W)
+    new_state = loop.run_game_turn(Key.S)
     assert isinstance(list(new_state.environment.map.get_objects(MapCoordinates(10, 9)))[0],
                       PlayerCharacter)
     assert len(list(new_state.environment.map.get_objects(MapCoordinates(10, 10)))) == 0
@@ -28,7 +28,7 @@ def test_player_makes_move(loop: GameLoop) -> None:
                       PlayerCharacter)
     assert len(list(new_state.environment.map.get_objects(MapCoordinates(10, 9)))) == 0
 
-    new_state = loop.run_game_turn(Key.S)
+    new_state = loop.run_game_turn(Key.W)
     assert isinstance(list(new_state.environment.map.get_objects(MapCoordinates(9, 10)))[0],
                       PlayerCharacter)
     assert len(list(new_state.environment.map.get_objects(MapCoordinates(9, 9)))) == 0
