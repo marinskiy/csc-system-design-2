@@ -1,0 +1,77 @@
+{
+  "map": {
+    "width": [
+      50,
+      50
+    ],
+    "height": [
+      30,
+      30
+    ]
+  },
+  "world_objects": {
+    "player": {
+      "stats": {
+        "health": [
+          90.0,
+          110.0
+        ],
+        "attack": [
+          90.0,
+          110.0
+        ]
+      }
+    },
+    "obstacle": {},
+    "treasure": {
+      "names": [
+        "helmet",
+        "boots",
+        "armor"
+      ],
+      "stats": {
+        "health": [
+          -10,
+          30
+        ],
+        "attack": [
+          -10,
+          30
+        ]
+      }
+    },
+    "mob": {
+      "level": [1, 5],
+      "radius": [5, 10],
+      "behaviours": [
+        "aggressive",
+        "cowardly",
+        "passive"
+      ],
+      "stats": {
+        "health": [
+          25,
+          50
+        ],
+        "attack": [
+          25,
+          50
+        ]
+      }
+    }
+  },
+  "wheel": {
+    "population": [
+      "obstacle",
+      "treasure",
+      "mob",
+      "none"
+    ],
+    "weights": [
+      16,
+      1,
+      1,
+      84
+    ]
+  }
+}
