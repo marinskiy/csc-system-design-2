@@ -8,7 +8,7 @@ Some objects may have `Stats` for changing owner characteristics.
 import copy
 import random
 import typing as tp
-from abc import abstractmethod, ABCMeta
+from abc import ABCMeta
 from dataclasses import dataclass
 
 from PIL import Image, ImageDraw, ImageFont
