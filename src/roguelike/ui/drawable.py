@@ -45,7 +45,6 @@ def drawable(resource_name: str) -> tp.Callable[[FuncT], FuncT]:
             def __init__(self, *args, **kwargs) -> None:  # type: ignore
                 super(ResourceDrawable, self).__init__(*args, **kwargs)
                 self._image_resource_name = resource_name
-                functools.update_wrapper(self, cls)
 
             def draw(self, width: int, height: int) -> Image:
                 return load_image_resource(self._image_resource_name, width, height)
