@@ -28,7 +28,7 @@ class GameLoader:
         with open(path, encoding="utf-8") as json_file:
             world_data = json.load(json_file)
         geomap, world_objects, enemies, player = GameLoader._load_world(world_data)
-        return GameState(Mode.MAP, Environment(geomap, world_objects, enemies), Inventory([]), player)
+        return GameState(Mode.MAP, Environment(geomap, enemies), Inventory([]), player)
 
     @staticmethod
     def _load_coordinates(value: tp.List[int]) -> MapCoordinates:

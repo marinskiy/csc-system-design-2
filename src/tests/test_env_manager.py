@@ -303,7 +303,7 @@ def test_inventory_calculates_additional_stats_correctly(
 
 
 def test_environment_creates_properly() -> None:
-    Environment(map=Map(1, 1), world_objects=[], enemies=set())
+    Environment(map=Map(1, 1), enemies=set())
 
 
 def test_player_character_creates_properly() -> None:
@@ -314,7 +314,7 @@ def test_player_character_creates_properly() -> None:
 def test_game_state_creates_properly() -> None:
     GameState(
         mode=Mode.MAP,
-        environment=Environment(Map(1, 1), [], set()),
+        environment=Environment(Map(1, 1), set()),
         inventory=Inventory([]),
         player=PlayerCharacter(Stats(1, 0)),
     )

@@ -11,21 +11,29 @@ from roguelike.game_engine.game_manager.action_processor.action_manager import A
 from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Key, Mode, Environment, Inventory
 
 
+@pytest.fixture(name="helmet")
+def generate_helmet() -> Treasure:
+    return Treasure("Super Helmet", Stats(1, 3))
+
+
+@pytest.fixture(name="boots")
+def generate_boots() -> Treasure:
+    return Treasure("Trashy boots", Stats(0, -2))
+
+
 @pytest.fixture(name="state")
-def generate_state() -> GameState:
+def generate_state(helmet: Treasure, boots: Treasure) -> GameState:
     player = PlayerCharacter(Stats(10, 2))
     geomap = Map(3, 2)
     geomap.add_object(MapCoordinates(1, 1), player)
     obstacle = Obstacle()
     geomap.add_object(MapCoordinates(0, 1), obstacle)
-    treasure = Treasure("Super Helmet", Stats(1, 3))
-    geomap.add_object(MapCoordinates(2, 1), treasure)
-    item = Treasure("Trashy boots", Stats(0, -2))
-    inventory = Inventory([item])
-    inventory.change_treasure_state(item)
+    geomap.add_object(MapCoordinates(2, 1), helmet)
+    inventory = Inventory([boots])
+    inventory.change_treasure_state(boots)
     enemy = Mob(3, Stats(7, 1), 3, PassiveBehaviour())
     geomap.add_object(MapCoordinates(0, 0), enemy)
-    return GameState(Mode.MAP, Environment(geomap, [player, obstacle, treasure, item], {enemy}), inventory, player)
+    return GameState(Mode.MAP, Environment(geomap, {enemy}), inventory, player)
 
 
 @pytest.fixture(name="actions")
@@ -53,7 +61,7 @@ def test_player_moves_everywhere_on_free_map_and_dont_cross_borders(
     geomap.add_object(MapCoordinates(1, 1), player)
     state = GameState(
         Mode.MAP,
-        Environment(geomap, [], set()),
+        Environment(geomap, set()),
         Inventory([]),
         player,
     )
@@ -97,7 +105,7 @@ def test_player_does_not_move_through_the_obstacles(
     geomap.add_object(player_initial_coordinates.down, Obstacle())
     state = GameState(
         Mode.MAP,
-        Environment(geomap, [], set()),
+        Environment(geomap, set()),
         Inventory([]),
         player,
     )
@@ -153,11 +161,15 @@ def test_player_attack(state: GameState, actions: ActionManager) -> None:
     assert geomap.get_coordinates(player) == MapCoordinates(0, 0)
 
 
-def test_take_treasure(state: GameState, actions: ActionManager) -> None:
+def test_take_treasure(
+        state: GameState,
+        actions: ActionManager,
+        helmet: Treasure,
+        boots: Treasure,
+) -> None:
     geomap = state.environment.map
     player = state.player
     inventory = state.inventory
-    helmet, boots = state.environment.world_objects[2:]
 
     assert inventory.get_treasures() == (boots,)
 
@@ -174,9 +186,13 @@ def test_take_treasure(state: GameState, actions: ActionManager) -> None:
     assert geomap.get_objects(coordinates) == (player,)
 
 
-def test_inventory_actions(state: GameState, actions: ActionManager) -> None:
+def test_inventory_actions(
+        helmet: Treasure,
+        boots: Treasure,
+        state: GameState,
+        actions: ActionManager,
+) -> None:
     inventory = state.inventory
-    helmet, boots = tp.cast(tp.List[Treasure], state.environment.world_objects[2:])
 
     assert inventory.get_additional_stats() == boots.stats
     actions.get_action(Key.D, state)(state)

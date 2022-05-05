@@ -213,14 +213,12 @@ class GameGenerator:
         return settings
 
     def generate(self) -> GameState:
-        world_objects: tp.List[MapObject] = []
         enemies: tp.Set[NPC] = set()
         geomap = self.map_generator.generate()
 
         player = self.object_generator.generate("player")
         if not isinstance(player, PlayerCharacter):
             raise ValueError("player should have type PlayerCharacter")
-        world_objects.append(player)
         player_coordinates = MapCoordinates(get_random_int_from_range([0, geomap.get_width() - 1]),
                                             get_random_int_from_range([0, geomap.get_height() - 1]))
         geomap.add_object(player_coordinates, player)
@@ -233,8 +231,7 @@ class GameGenerator:
                         continue
                     new_object = self.object_generator.generate(new_object_type)
                     geomap.add_object(MapCoordinates(i, j), new_object)
-                    world_objects.append(new_object)
                     if isinstance(new_object, NPC):
                         enemies.add(new_object)
 
-        return GameState(Mode.MAP, Environment(geomap, world_objects, enemies), Inventory([]), player)
+        return GameState(Mode.MAP, Environment(geomap, enemies), Inventory([]), player)

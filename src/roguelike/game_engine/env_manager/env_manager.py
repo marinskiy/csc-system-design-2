@@ -101,5 +101,4 @@ class Inventory:
 @dataclass
 class Environment:
     map: Map
-    world_objects: tp.List[MapObject]
     enemies: tp.Set[NPC]
