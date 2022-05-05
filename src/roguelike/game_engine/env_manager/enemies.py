@@ -147,7 +147,7 @@ class NPC(Creature):
         return self._action_radius
 
 
-@drawable('demon.png')
+@drawable('npc.png')
 class Mob(NPC):
     """Normal enemy"""
 
@@ -159,7 +159,7 @@ class Mob(NPC):
         self._behaviour.act(self, geomap, player)
 
 
-@drawable('pepe.png')
+@drawable('confused.png')
 class ConfusedMob(NPC):
     """Enemy in a confused state"""
 
