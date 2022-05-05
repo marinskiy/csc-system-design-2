@@ -126,5 +126,5 @@ class Treasure(MapObject, Drawable):
         d = ImageDraw.Draw(img)
 
         text = f'{self._stats.attack}/{self._stats.health}'
-        d.text((2, height - 15), text, font=fnt, fill=(0, 0, 0))
+        d.text((2, height - 15), text, font=fnt, fill='yellow')
         return img

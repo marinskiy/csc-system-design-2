@@ -35,15 +35,24 @@ class InventoryPresenter(Drawable):
             return self._treasures[self._current]
         return None
 
-    def _draw_inventory_cell(self, treasure_id: int, cell_size: int, mark_as_selected: bool) -> Image:
+    def _draw_inventory_cell(
+            self,
+            treasure_id: int,
+            cell_size: int,
+            mark_as_selected: bool,
+    ) -> Image:
+        storage = load_image_resource('empty_inventory.png', cell_size, cell_size).copy()
         if treasure_id >= len(self._treasures):
-            return load_image_resource('empty_inventory.png', cell_size, cell_size)
+            return storage
         if not mark_as_selected:
-            return self._treasures[treasure_id].draw(cell_size, cell_size, draw_stats=True)
-        result = Image.new('RGB', (cell_size, cell_size), color='blue')
+            treasure = self._treasures[treasure_id].draw(cell_size, cell_size, draw_stats=True)
+            storage.paste(treasure, (5, 5), treasure)
+            return storage
+        selection = load_image_resource('inventory_selection.png', cell_size, cell_size)
+        storage.paste(selection, (0, 0), selection)
         treasure_icon = self._treasures[treasure_id].draw(cell_size - 10, cell_size - 10, draw_stats=True)
-        result.paste(treasure_icon, (5, 5))
-        return result
+        storage.paste(treasure_icon, (5, 5), treasure_icon)
+        return storage
 
     def draw(self, width: int, height: int) -> Image:
         assert width // const.INVENTORY_WIDTH == height // const.INVENTORY_HEIGHT
