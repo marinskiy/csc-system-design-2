@@ -2,17 +2,17 @@
 Contains all classes needed to generate game
 """
 
-import typing as tp
-import random
-import os
 import json
+import os
+import random
+import typing as tp
 
 from roguelike.game_engine.env_manager.enemies import Mob, BehaviourFactory, NPC
-from roguelike.game_engine.env_manager.env_manager import Environment, Inventory
+from roguelike.game_engine.env_manager.env_manager import Environment, Inventory, SupportsNpcProtocol
 from roguelike.game_engine.env_manager.map import Map, MapCoordinates
-from roguelike.game_engine.game_manager.game_constructor.game_loader import check_dict_fields
 from roguelike.game_engine.env_manager.map_objects_storage import Stats, PlayerCharacter, Obstacle, Treasure, \
     MapObject
+from roguelike.game_engine.game_manager.game_constructor.game_loader import check_dict_fields
 from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Mode
 
 DEFAULT_GAME_SETTINGS_FILE = os.path.join(os.path.dirname(__file__), "../../../../assets/default_game.json")
@@ -213,7 +213,7 @@ class GameGenerator:
         return settings
 
     def generate(self) -> GameState:
-        enemies: tp.Set[NPC] = set()
+        enemies: tp.Set[SupportsNpcProtocol] = set()
         geomap = self.map_generator.generate()
 
         player = self.object_generator.generate("player")

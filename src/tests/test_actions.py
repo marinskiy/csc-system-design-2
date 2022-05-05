@@ -1,12 +1,11 @@
 """Action manager tests"""
 import random
-import typing as tp
 
 import pytest
 
 from roguelike.game_engine.env_manager import Map, MapCoordinates, Stats
-from roguelike.game_engine.env_manager.map_objects_storage import Treasure, Obstacle, PlayerCharacter
 from roguelike.game_engine.env_manager.enemies import Mob, ConfusedMob, PassiveBehaviour
+from roguelike.game_engine.env_manager.map_objects_storage import Treasure, Obstacle, PlayerCharacter
 from roguelike.game_engine.game_manager.action_processor.action_manager import ActionManager
 from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Key, Mode, Environment, Inventory
 

@@ -99,13 +99,29 @@ class Inventory:
         return self._presenter
 
 
-class Enemy:
+class SupportsNpcProtocol(tp.Protocol):
     """Adapter used instead of NPC class"""
-    def act(self, env: Environment, player: PlayerCharacter) -> None:
-        pass
+
+    def act(self, env: Environment, player: PlayerCharacter) -> None: ...
+
+    @property
+    def action_radius(self) -> int: ...
+
+    @property
+    def attack_power(self) -> int: ...
+
+    def take_damage(self, power: int) -> None: ...
+
+    @property
+    def level(self) -> int: ...
+
+    def is_dead(self) -> int: ...
+
+    @property
+    def stats(self) -> Stats: ...
 
 
 @dataclass
 class Environment:
     map: Map
-    enemies: tp.Set[Enemy]
+    enemies: tp.Set[SupportsNpcProtocol]

@@ -4,7 +4,6 @@ from __future__ import annotations
 import random
 import typing as tp
 from abc import abstractmethod
-from copy import deepcopy
 from enum import Enum, auto
 
 from roguelike.ui.drawable import drawable
@@ -77,7 +76,7 @@ def _move_creature_to(actor: Mob, geomap: Map, player: PlayerCharacter, new_coor
 class Behaviour:
     """Class that is responsible for mob's behaviour"""
 
-    def __str__(self):
+    def __str__(self) -> str:
         return type(self).__name__
 
     @staticmethod

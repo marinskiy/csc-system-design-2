@@ -6,7 +6,8 @@ import json
 import typing as tp
 
 from roguelike.game_engine.env_manager import MapCoordinates, Map, Environment, Inventory, Stats, MapObject
-from roguelike.game_engine.env_manager.enemies import Mob, BehaviourFactory, NPC
+from roguelike.game_engine.env_manager.enemies import Mob, BehaviourFactory, NPC, AggressiveBehaviour
+from roguelike.game_engine.env_manager.env_manager import SupportsNpcProtocol
 from roguelike.game_engine.env_manager.map_objects_storage import Obstacle, Treasure, PlayerCharacter
 from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Mode
 
@@ -27,7 +28,7 @@ class GameLoader:
     def load_game(path: str) -> GameState:
         with open(path, encoding="utf-8") as json_file:
             world_data = json.load(json_file)
-        geomap, world_objects, enemies, player = GameLoader._load_world(world_data)
+        geomap, enemies, player = GameLoader._load_world(world_data)
         return GameState(Mode.MAP, Environment(geomap, enemies), Inventory([]), player)
 
     @staticmethod
@@ -97,22 +98,20 @@ class GameLoader:
         return world_object, coords
 
     @staticmethod
-    def _load_world(value: tp.Dict[str, tp.Any]) -> tp.Tuple[Map, tp.List[tp.Any], tp.Set[NPC], PlayerCharacter]:
+    def _load_world(value: tp.Dict[str, tp.Any]) -> tp.Tuple[Map, tp.Set[SupportsNpcProtocol], PlayerCharacter]:
         if not check_dict_fields(value, ["map", "objects"]) or not isinstance(value["objects"], list):
             raise ValueError("Invalid json format")
 
         geomap = GameLoader._load_map(value["map"])
-        world_objects: tp.List[MapObject] = []
-        enemies: tp.Set[NPC] = set()
+        enemies: tp.Set[SupportsNpcProtocol] = set()
 
         for map_object_json in value["objects"]:
             world_object, coords = GameLoader._load_world_object(map_object_json)
 
-            world_objects.append(world_object)
             if isinstance(world_object, PlayerCharacter):
                 player = world_object
             if isinstance(world_object, NPC):
                 enemies.add(world_object)
             geomap.add_object(coords, world_object)
 
-        return geomap, world_objects, enemies, player
+        return geomap, enemies, player
