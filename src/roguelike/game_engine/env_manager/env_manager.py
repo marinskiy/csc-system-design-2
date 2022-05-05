@@ -1,15 +1,16 @@
 """Contains high level classes for managing environment"""
 
+from __future__ import annotations
+
 import typing as tp
 from dataclasses import dataclass
 
 from PIL import Image
 
 from roguelike import const
-from roguelike.game_engine.env_manager.enemies import NPC
 from roguelike.game_engine.env_manager.map import Map
+from roguelike.game_engine.env_manager.map_objects_storage import Treasure, Stats, PlayerCharacter
 from roguelike.ui.drawable import Drawable, load_image_resource
-from roguelike.game_engine.env_manager.map_objects_storage import Treasure, MapObject, Stats
 
 
 class InventoryPresenter(Drawable):
@@ -98,7 +99,13 @@ class Inventory:
         return self._presenter
 
 
+class Enemy:
+    """Adapter used instead of NPC class"""
+    def act(self, env: Environment, player: PlayerCharacter) -> None:
+        pass
+
+
 @dataclass
 class Environment:
     map: Map
-    enemies: tp.Set[NPC]
+    enemies: tp.Set[Enemy]

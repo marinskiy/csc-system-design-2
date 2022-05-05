@@ -124,6 +124,7 @@ def test_player_does_not_move_through_the_obstacles(
 
 def test_player_attack(state: GameState, actions: ActionManager) -> None:
     random.seed(2)
+    env = state.environment
     geomap = state.environment.map
     player = state.player
     enemy = next(iter(state.environment.enemies))
@@ -146,9 +147,9 @@ def test_player_attack(state: GameState, actions: ActionManager) -> None:
     for new_enemy in new_enemies:
         assert isinstance(new_enemy, ConfusedMob)
         for _ in range(2):
-            new_enemy.act(geomap, player)
+            new_enemy.act(env, player)
         assert isinstance(new_enemy, ConfusedMob)
-        new_enemy.act(geomap, player)
+        new_enemy.act(env, player)
 
     assert (enemy,) == geomap.get_objects(MapCoordinates(0, 0))
     assert not enemy.is_dead()
@@ -242,5 +243,5 @@ def test_confusion() -> None:
         MapCoordinates(3, 4),
     ]
     for coordinate in expected_track:
-        confused.act(geomap, player)
+        confused.act(Environment(geomap, set()), player)
         assert geomap.get_coordinates(confused) == coordinate

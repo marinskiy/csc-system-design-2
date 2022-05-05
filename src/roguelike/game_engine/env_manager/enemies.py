@@ -1,13 +1,16 @@
 """This module contains classes for enemies"""
-import random
+from __future__ import annotations
 
+import random
 import typing as tp
 from abc import abstractmethod
+from copy import deepcopy
 from enum import Enum, auto
 
+from roguelike.ui.drawable import drawable
+from . import Environment
 from .map import MapCoordinates, Map
 from .map_objects_storage import Creature, Stats, Obstacle, PlayerCharacter
-from roguelike.ui.drawable import drawable
 
 
 class CreatureMove(Enum):
@@ -35,8 +38,10 @@ def _get_all_possible_creature_move_coords(actor_coords: MapCoordinates, geomap:
     return possible_coordinates
 
 
-def _get_possible_creature_moves(move_type: CreatureMove, actor: 'Mob',
-                                 geomap: Map, player: PlayerCharacter) -> tp.List[MapCoordinates]:
+def _get_possible_creature_moves(
+        move_type: CreatureMove, actor: Mob,
+        geomap: Map, player: PlayerCharacter,
+) -> tp.List[MapCoordinates]:
     actor_coords = geomap.get_coordinates(actor)
     if not isinstance(actor_coords, MapCoordinates):
         raise ValueError('Actor is not on the map')
@@ -55,11 +60,11 @@ def _get_possible_creature_moves(move_type: CreatureMove, actor: 'Mob',
     return []
 
 
-def _attack_player(actor: 'Mob', player: PlayerCharacter) -> None:
+def _attack_player(actor: Mob, player: PlayerCharacter) -> None:
     player.take_damage(actor.attack_power)
 
 
-def _move_creature_to(actor: 'Mob', geomap: Map, player: PlayerCharacter, new_coordinates: MapCoordinates) -> None:
+def _move_creature_to(actor: Mob, geomap: Map, player: PlayerCharacter, new_coordinates: MapCoordinates) -> None:
     if _coord_has_objects_of_types(new_coordinates, geomap, [Obstacle, NPC]):
         return
     if _coord_has_objects_of_types(new_coordinates, geomap, [PlayerCharacter]):
@@ -76,40 +81,40 @@ class Behaviour:
         return type(self).__name__
 
     @staticmethod
-    def _check_player_in_action_radius(actor: 'Mob', geomap: Map, player: PlayerCharacter) -> bool:
+    def _check_player_in_action_radius(actor: Mob, geomap: Map, player: PlayerCharacter) -> bool:
         distance = geomap.get_distance_between_objects(actor, player)
         if distance > actor.action_radius:
             return False
         return True
 
-    def act(self, actor: 'Mob', geomap: Map, player: PlayerCharacter) -> None:
-        if not self._check_player_in_action_radius(actor, geomap, player):
+    def act(self, actor: Mob, env: Environment, player: PlayerCharacter) -> None:
+        if not self._check_player_in_action_radius(actor, env.map, player):
             return
 
-        possible_moves = self._get_possible_moves(actor, geomap, player)
+        possible_moves = self._get_possible_moves(actor, env.map, player)
         if len(possible_moves) == 0:
             return
 
         new_coordinates = random.choice(possible_moves)
-        _move_creature_to(actor, geomap, player, new_coordinates)
+        _move_creature_to(actor, env.map, player, new_coordinates)
 
     @abstractmethod
-    def _get_possible_moves(self, actor: 'Mob', geomap: Map, player: PlayerCharacter) -> tp.List[MapCoordinates]:
+    def _get_possible_moves(self, actor: Mob, geomap: Map, player: PlayerCharacter) -> tp.List[MapCoordinates]:
         pass
 
 
 class AggressiveBehaviour(Behaviour):
-    def _get_possible_moves(self, actor: 'Mob', geomap: Map, player: PlayerCharacter) -> tp.List[MapCoordinates]:
+    def _get_possible_moves(self, actor: Mob, geomap: Map, player: PlayerCharacter) -> tp.List[MapCoordinates]:
         return _get_possible_creature_moves(CreatureMove.MOVE_CLOSER, actor, geomap, player)
 
 
 class CowardlyBehaviour(Behaviour):
-    def _get_possible_moves(self, actor: 'Mob', geomap: Map, player: PlayerCharacter) -> tp.List[MapCoordinates]:
+    def _get_possible_moves(self, actor: Mob, geomap: Map, player: PlayerCharacter) -> tp.List[MapCoordinates]:
         return _get_possible_creature_moves(CreatureMove.MOVE_AWAY, actor, geomap, player)
 
 
 class PassiveBehaviour(Behaviour):
-    def _get_possible_moves(self, actor: 'Mob', geomap: Map, player: PlayerCharacter) -> tp.List[MapCoordinates]:
+    def _get_possible_moves(self, actor: Mob, geomap: Map, player: PlayerCharacter) -> tp.List[MapCoordinates]:
         return []
 
 
@@ -139,7 +144,7 @@ class NPC(Creature):
         self._action_radius = radius
 
     @abstractmethod
-    def act(self, geomap: Map, player: PlayerCharacter) -> None:
+    def act(self, env: Environment, player: PlayerCharacter) -> None:
         pass
 
     @property
@@ -155,8 +160,8 @@ class Mob(NPC):
         super().__init__(level, stats, radius)
         self._behaviour = behaviour
 
-    def act(self, geomap: Map, player: PlayerCharacter) -> None:
-        self._behaviour.act(self, geomap, player)
+    def act(self, env: Environment, player: PlayerCharacter) -> None:
+        self._behaviour.act(self, env, player)
 
 
 @drawable('confused.png')
@@ -175,19 +180,19 @@ class ConfusedMob(NPC):
     def _get_normal(self) -> NPC:
         return self._normal
 
-    def _act_confused(self, geomap: Map, coordinates: MapCoordinates) -> None:
-        possible_coordinates = geomap.get_neighbours(coordinates)
+    def _act_confused(self, env: Environment, coordinates: MapCoordinates) -> None:
+        possible_coordinates = env.map.get_neighbours(coordinates)
         new_coordinates = random.choice(possible_coordinates)
-        if _coord_has_objects_of_types(new_coordinates, geomap, [Creature, Obstacle]):
+        if _coord_has_objects_of_types(new_coordinates, env.map, [Creature, Obstacle]):
             return
-        geomap.move_to(self, new_coordinates)
+        env.map.move_to(self, new_coordinates)
 
-    def act(self, geomap: Map, player: PlayerCharacter) -> None:
-        coordinates = geomap.get_coordinates(self)
+    def act(self, env: Environment, player: PlayerCharacter) -> None:
+        coordinates = env.map.get_coordinates(self)
         if coordinates is None:
             raise RuntimeError
 
-        self._act_confused(geomap, coordinates)
+        self._act_confused(env, coordinates)
 
         self._timeout -= 1
         if self._timeout == 0:
