@@ -72,6 +72,9 @@ def _move_creature_to(actor: 'Mob', geomap: Map, player: PlayerCharacter, new_co
 class Behaviour:
     """Class that is responsible for mob's behaviour"""
 
+    def __str__(self):
+        return type(self).__name__
+
     @staticmethod
     def _check_player_in_action_radius(actor: 'Mob', geomap: Map, player: PlayerCharacter) -> bool:
         distance = geomap.get_distance_between_objects(actor, player)
