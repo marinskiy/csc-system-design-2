@@ -4,6 +4,7 @@ import abc
 import functools
 import os
 import typing as tp
+from functools import wraps
 
 from PIL import Image
 
@@ -41,6 +42,7 @@ def drawable(resource_path: str) -> tp.Callable[[FuncT], FuncT]:
     assert resource_path.endswith('.png')
 
     def class_wrapper(cls):  # type: ignore
+        @wraps(cls, updated=())
         class ResourceDrawable(cls, Drawable):
             def __init__(self, *args, **kwargs) -> None:  # type: ignore
                 super(ResourceDrawable, self).__init__(*args, **kwargs)
