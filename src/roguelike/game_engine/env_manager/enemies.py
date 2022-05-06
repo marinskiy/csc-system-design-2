@@ -213,10 +213,12 @@ class ReplicatingMob(Mob):
             stats: Stats,
             radius: int,
             behaviour: Behaviour,
-            replication_probability: float,
+            replication_rate: float,
+            replication_rate_decay: float,
     ) -> None:
         super().__init__(level, stats, radius, behaviour)
-        self._replication_probability = replication_probability
+        self._replication_rate = replication_rate
+        self._replication_rate_decay = replication_rate_decay
 
     def _get_replica_location(self, geomap: Map) -> tp.Optional[MapCoordinates]:
         self_coordinate = geomap.get_coordinates(self)
@@ -234,12 +236,12 @@ class ReplicatingMob(Mob):
         replica_spawn_location = self._get_replica_location(env.map)
         if replica_spawn_location is None:
             return
-        self._replication_probability /= 2
+        self._replication_rate *= self._replication_rate_decay
         replicated_mob = deepcopy(self)
         env.map.add_object(replica_spawn_location, replicated_mob)
         env.enemies.add(replicated_mob)
 
     def act(self, env: Environment, player: PlayerCharacter) -> None:
         super().act(env, player)
-        if random.random() < self._replication_probability:
+        if random.random() < self._replication_rate:
             self._replicate(env)

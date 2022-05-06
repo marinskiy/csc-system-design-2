@@ -42,7 +42,7 @@ def test_replicating_mob_replicates() -> None:
     mob = ReplicatingMob(
         level=1, stats=Stats(0, 0),
         radius=1, behaviour=PassiveBehaviour(),
-        replication_probability=1.0,
+        replication_rate=1.0, replication_rate_decay=1.0,
     )
     env.enemies.add(mob)
     mob_coordinates = MapCoordinates(1, 1)
@@ -62,7 +62,6 @@ def test_replicating_mob_replicates() -> None:
     # |....|
     # |.M..|
     # |OM..|
-    # env.map._coord_to_cell
     objects_at_coord = list(env.map.get_objects(MapCoordinates(1, 2)))
     assert len(objects_at_coord) == 1
     first_replica = objects_at_coord[0]
@@ -77,9 +76,9 @@ def test_replicating_mob_replicates() -> None:
     assert count_total_class_instances_on_map(env.map, ReplicatingMob) == 3
     # |...P|
     # |.M..|
-    # |.M..|
-    # |OM..|
-    objects_at_coord = list(env.map.get_objects(MapCoordinates(1, 0)))
+    # |.MM.|
+    # |O...|
+    objects_at_coord = list(env.map.get_objects(MapCoordinates(2, 1)))
     assert len(objects_at_coord) == 1
     second_replica = objects_at_coord[0]
     assert isinstance(second_replica, ReplicatingMob)
