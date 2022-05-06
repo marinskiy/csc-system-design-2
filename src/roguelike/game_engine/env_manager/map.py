@@ -69,6 +69,9 @@ class MapCell:
     def items(self) -> tp.Collection[MapObject]:
         return tuple(self._items)
 
+    def __repr__(self) -> str:
+        return ', '.join(str(obj) for obj in self._items) if self._items else ''
+
 
 class Map(Drawable):
     """Container for interacting with objects on the map"""
