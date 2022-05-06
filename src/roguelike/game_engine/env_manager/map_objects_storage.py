@@ -25,6 +25,9 @@ class MapObject:
     def draw(self, width: int, height: int) -> Image:
         raise NotImplementedError()
 
+    def __repr__(self) -> str:
+        return type(self).__name__
+
 
 @drawable('mountains.png')
 class Obstacle(MapObject):
