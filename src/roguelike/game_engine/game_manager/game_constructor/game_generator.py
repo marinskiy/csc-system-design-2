@@ -1,7 +1,7 @@
 """
 Contains all classes needed to generate game
 """
-
+import itertools
 import json
 import os
 import random
@@ -223,15 +223,15 @@ class GameGenerator:
                                             get_random_int_from_range([0, geomap.get_height() - 1]))
         geomap.add_object(player_coordinates, player)
 
-        for i in range(geomap.get_width()):
-            for j in range(geomap.get_height()):
-                if len(geomap.get_objects(MapCoordinates(i, j))) == 0:
-                    new_object_type = self.wheel.get_next_object_type()
-                    if new_object_type == "none":
-                        continue
-                    new_object = self.object_generator.generate(new_object_type)
-                    geomap.add_object(MapCoordinates(i, j), new_object)
-                    if isinstance(new_object, NPC):
-                        enemies.add(new_object)
+        for i, j in itertools.product(range(geomap.get_width()),
+                                      range(geomap.get_height())):
+            if len(geomap.get_objects(MapCoordinates(i, j))) == 0:
+                new_object_type = self.wheel.get_next_object_type()
+                if new_object_type == "none":
+                    continue
+                new_object = self.object_generator.generate(new_object_type)
+                geomap.add_object(MapCoordinates(i, j), new_object)
+                if isinstance(new_object, NPC):
+                    enemies.add(new_object)
 
         return GameState(Mode.MAP, Environment(geomap, enemies), Inventory([]), player)
