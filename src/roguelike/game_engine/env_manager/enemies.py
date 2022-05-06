@@ -4,6 +4,7 @@ from __future__ import annotations
 import random
 import typing as tp
 from abc import abstractmethod
+from copy import deepcopy
 from enum import Enum, auto
 
 from roguelike.ui.drawable import drawable
@@ -200,3 +201,45 @@ class ConfusedMob(NPC):
     def take_damage(self, power: int) -> None:
         super().take_damage(power)
         self._normal.take_damage(power)
+
+
+@drawable('npc_replicating.png')
+class ReplicatingMob(Mob):
+    """Enemy in a confused state"""
+
+    def __init__(
+            self,
+            level: int,
+            stats: Stats,
+            radius: int,
+            behaviour: Behaviour,
+            replication_probability: float,
+    ) -> None:
+        super().__init__(level, stats, radius, behaviour)
+        self._replication_probability = replication_probability
+
+    def _get_replica_location(self, geomap: Map) -> tp.Optional[MapCoordinates]:
+        self_coordinate = geomap.get_coordinates(self)
+        if self_coordinate is None:
+            raise ValueError('Could not find replicating mob location on map. Is it placed there?')
+        possible_spawn_locations = [
+            location for location in geomap.get_neighbours(self_coordinate)
+            if not geomap.get_objects(location)
+        ]
+        if not possible_spawn_locations:
+            return None
+        return random.choice(possible_spawn_locations)
+
+    def _replicate(self, env: Environment) -> None:
+        replica_spawn_location = self._get_replica_location(env.map)
+        if replica_spawn_location is None:
+            return
+        self._replication_probability /= 2
+        replicated_mob = deepcopy(self)
+        env.map.add_object(replica_spawn_location, replicated_mob)
+        env.enemies.add(replicated_mob)
+
+    def act(self, env: Environment, player: PlayerCharacter) -> None:
+        super().act(env, player)
+        if random.random() < self._replication_probability:
+            self._replicate(env)
