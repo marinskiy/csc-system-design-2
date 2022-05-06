@@ -6,7 +6,7 @@ import json
 import typing as tp
 
 from roguelike.game_engine.env_manager import MapCoordinates, Map, Environment, Inventory, Stats, MapObject
-from roguelike.game_engine.env_manager.enemies import Mob, BehaviourFactory, NPC, AggressiveBehaviour
+from roguelike.game_engine.env_manager.enemies import Mob, BehaviourFactory, NPC
 from roguelike.game_engine.env_manager.env_manager import SupportsNpcProtocol
 from roguelike.game_engine.env_manager.map_objects_storage import Obstacle, Treasure, PlayerCharacter
 from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Mode
