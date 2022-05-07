@@ -2,7 +2,7 @@
 
 import pytest
 
-from roguelike.game_engine.env_manager.enemies import Mob
+from roguelike.game_engine.env_manager.enemies import Mob, ReplicatingMob
 from roguelike.game_engine.env_manager.map import MapCoordinates
 from roguelike.game_engine.env_manager.map_objects_storage import Obstacle, PlayerCharacter, Treasure
 from roguelike.game_engine.game_manager.game_constructor.game_generator import GameGenerator, StatsGenerator, \
@@ -80,10 +80,10 @@ def test_mob_generated_correctly() -> None:
 
     assert 1 <= test_mob.level <= 5
     assert 5 <= test_mob.action_radius <= 10
-    assert apply_level_multiplier(25, test_mob.level) <= test_mob.stats.health <= apply_level_multiplier(50,
-                                                                                                         test_mob.level)
-    assert apply_level_multiplier(25, test_mob.level) <= test_mob.stats.attack <= apply_level_multiplier(50,
-                                                                                                         test_mob.level)
+    assert apply_level_multiplier(25, test_mob.level) <= test_mob.stats.health <= \
+           apply_level_multiplier(50, test_mob.level)
+    assert apply_level_multiplier(25, test_mob.level) <= test_mob.stats.attack <= \
+           apply_level_multiplier(50, test_mob.level)
 
 
 def test_map_object_generated_correctly() -> None:
@@ -93,7 +93,8 @@ def test_map_object_generated_correctly() -> None:
             "obstacle": {},
             "treasure": {"names": ["helmet", "boots", "armor"], "stats": {"health": [-10, 30], "attack": [-10, 30]}},
             "mob": {"level": [1, 5], "radius": [5, 10], "behaviours": ["aggressive", "cowardly", "passive"],
-                    "stats": {"health": [25, 50], "attack": [25, 50]}}
+                    "stats": {"health": [25, 50], "attack": [25, 50]}},
+            "replicating_mob": {"replication_rate": [0.5, 1.0], "replication_rate_decay": [0.5, 1.0]}
         }
     )
 
@@ -115,10 +116,15 @@ def test_map_object_generated_correctly() -> None:
     assert isinstance(test_mob, Mob)
     assert 1 <= test_mob.level <= 5
     assert 5 <= test_mob.action_radius <= 10
-    assert apply_level_multiplier(25, test_mob.level) <= test_mob.stats.health <= apply_level_multiplier(50,
-                                                                                                         test_mob.level)
-    assert apply_level_multiplier(25, test_mob.level) <= test_mob.stats.attack <= apply_level_multiplier(50,
-                                                                                                         test_mob.level)
+    assert apply_level_multiplier(25, test_mob.level) <= test_mob.stats.health <= \
+           apply_level_multiplier(50, test_mob.level)
+    assert apply_level_multiplier(25, test_mob.level) <= test_mob.stats.attack <= \
+           apply_level_multiplier(50, test_mob.level)
+
+    test_replicating_mob = object_generator.generate("replicating_mob")
+    assert isinstance(test_replicating_mob, ReplicatingMob)
+    assert 0.5 <= test_replicating_mob._replication_rate <= 1.0
+    assert 0.5 <= test_replicating_mob._replication_rate_decay <= 1.0
 
     with pytest.raises(ValueError):
         object_generator.generate("none")
