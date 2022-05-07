@@ -123,8 +123,8 @@ def test_map_object_generated_correctly() -> None:
 
     test_replicating_mob = object_generator.generate("replicating_mob")
     assert isinstance(test_replicating_mob, ReplicatingMob)
-    assert 0.5 <= test_replicating_mob._replication_rate <= 1.0
-    assert 0.5 <= test_replicating_mob._replication_rate_decay <= 1.0
+    assert 0.5 <= test_replicating_mob._replication_rate <= 1.0  # pylint: disable=W0212
+    assert 0.5 <= test_replicating_mob._replication_rate_decay <= 1.0  # pylint: disable=W0212
 
     with pytest.raises(ValueError):
         object_generator.generate("none")
