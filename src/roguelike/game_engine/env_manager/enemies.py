@@ -205,7 +205,7 @@ class ConfusedMob(NPC):
 
 @drawable('npc_replicating.png')
 class ReplicatingMob(Mob):
-    """Enemy in a confused state"""
+    """Enemy that can replicate"""
 
     def __init__(
             self,
