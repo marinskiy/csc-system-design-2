@@ -4,6 +4,7 @@ import abc
 import functools
 import os
 import typing as tp
+from functools import wraps
 
 from PIL import Image
 
@@ -35,19 +36,24 @@ def load_image_resource(
     return img if width is None or height is None else resize_image(img, width, height)
 
 
-def drawable(resource_name: str) -> tp.Callable[[FuncT], FuncT]:
+def drawable(resource_path: str) -> tp.Callable[[FuncT], FuncT]:
     """Decorator for drawable classes"""
 
-    assert resource_name.endswith('.png')
+    assert resource_path.endswith('.png')
 
     def class_wrapper(cls):  # type: ignore
+        @wraps(cls, updated=())
         class ResourceDrawable(cls, Drawable):
             def __init__(self, *args, **kwargs) -> None:  # type: ignore
                 super(ResourceDrawable, self).__init__(*args, **kwargs)
-                self._image_resource_name = resource_name
+                if hasattr(self, '_behaviour'):
+                    resource_name, resource_format = resource_path.split('.')
+                    self._image_resource_path = f'{resource_name}_{self._behaviour}.{resource_format}'
+                else:
+                    self._image_resource_path = resource_path
 
             def draw(self, width: int, height: int) -> Image:
-                return load_image_resource(self._image_resource_name, width, height)
+                return load_image_resource(self._image_resource_path, width, height)
 
         return ResourceDrawable
 

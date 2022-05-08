@@ -69,6 +69,9 @@ class MapCell:
     def items(self) -> tp.Collection[MapObject]:
         return tuple(self._items)
 
+    def __repr__(self) -> str:
+        return ', '.join(str(obj) for obj in self._items) if self._items else ''
+
 
 class Map(Drawable):
     """Container for interacting with objects on the map"""
@@ -130,9 +133,11 @@ class Map(Drawable):
 
     def _draw_map_cell(self, coordinates: MapCoordinates, size: int) -> Image:
         objs = list(self.get_objects(coordinates))
-        if objs:
-            return objs[-1].draw(size, size)
-        return load_image_resource('grass.png', size, size)
+        background = load_image_resource('grass.png', size, size).copy()
+        for obj in objs:
+            obj_drawing = obj.draw(size, size)
+            background.paste(obj_drawing, (0, 0), obj_drawing)
+        return background
 
     def draw(self, width: int, height: int) -> Image:
         cell_size = width // self._width

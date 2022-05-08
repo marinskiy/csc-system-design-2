@@ -25,6 +25,9 @@ class MapObject:
     def draw(self, width: int, height: int) -> Image:
         raise NotImplementedError()
 
+    def __repr__(self) -> str:
+        return type(self).__name__
+
 
 @drawable('mountains.png')
 class Obstacle(MapObject):
@@ -126,5 +129,5 @@ class Treasure(MapObject, Drawable):
         d = ImageDraw.Draw(img)
 
         text = f'{self._stats.attack}/{self._stats.health}'
-        d.text((2, height - 15), text, font=fnt, fill=(0, 0, 0))
+        d.text((2, height - 15), text, font=fnt, fill='yellow')
         return img

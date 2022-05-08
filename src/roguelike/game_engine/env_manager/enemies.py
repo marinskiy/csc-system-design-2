@@ -1,13 +1,16 @@
 """This module contains classes for enemies"""
-import random
+from __future__ import annotations
 
+import random
 import typing as tp
 from abc import abstractmethod
+from copy import deepcopy
 from enum import Enum, auto
 
+from roguelike.ui.drawable import drawable
+from . import Environment
 from .map import MapCoordinates, Map
 from .map_objects_storage import Creature, Stats, Obstacle, PlayerCharacter
-from roguelike.ui.drawable import drawable
 
 
 class CreatureMove(Enum):
@@ -35,8 +38,10 @@ def _get_all_possible_creature_move_coords(actor_coords: MapCoordinates, geomap:
     return possible_coordinates
 
 
-def _get_possible_creature_moves(move_type: CreatureMove, actor: 'Mob',
-                                 geomap: Map, player: PlayerCharacter) -> tp.List[MapCoordinates]:
+def _get_possible_creature_moves(
+        move_type: CreatureMove, actor: Mob,
+        geomap: Map, player: PlayerCharacter,
+) -> tp.List[MapCoordinates]:
     actor_coords = geomap.get_coordinates(actor)
     if not isinstance(actor_coords, MapCoordinates):
         raise ValueError('Actor is not on the map')
@@ -55,11 +60,11 @@ def _get_possible_creature_moves(move_type: CreatureMove, actor: 'Mob',
     return []
 
 
-def _attack_player(actor: 'Mob', player: PlayerCharacter) -> None:
+def _attack_player(actor: Mob, player: PlayerCharacter) -> None:
     player.take_damage(actor.attack_power)
 
 
-def _move_creature_to(actor: 'Mob', geomap: Map, player: PlayerCharacter, new_coordinates: MapCoordinates) -> None:
+def _move_creature_to(actor: Mob, geomap: Map, player: PlayerCharacter, new_coordinates: MapCoordinates) -> None:
     if _coord_has_objects_of_types(new_coordinates, geomap, [Obstacle, NPC]):
         return
     if _coord_has_objects_of_types(new_coordinates, geomap, [PlayerCharacter]):
@@ -72,41 +77,44 @@ def _move_creature_to(actor: 'Mob', geomap: Map, player: PlayerCharacter, new_co
 class Behaviour:
     """Class that is responsible for mob's behaviour"""
 
+    def __str__(self) -> str:
+        return type(self).__name__
+
     @staticmethod
-    def _check_player_in_action_radius(actor: 'Mob', geomap: Map, player: PlayerCharacter) -> bool:
+    def _check_player_in_action_radius(actor: Mob, geomap: Map, player: PlayerCharacter) -> bool:
         distance = geomap.get_distance_between_objects(actor, player)
         if distance > actor.action_radius:
             return False
         return True
 
-    def act(self, actor: 'Mob', geomap: Map, player: PlayerCharacter) -> None:
-        if not self._check_player_in_action_radius(actor, geomap, player):
+    def act(self, actor: Mob, env: Environment, player: PlayerCharacter) -> None:
+        if not self._check_player_in_action_radius(actor, env.map, player):
             return
 
-        possible_moves = self._get_possible_moves(actor, geomap, player)
+        possible_moves = self._get_possible_moves(actor, env.map, player)
         if len(possible_moves) == 0:
             return
 
         new_coordinates = random.choice(possible_moves)
-        _move_creature_to(actor, geomap, player, new_coordinates)
+        _move_creature_to(actor, env.map, player, new_coordinates)
 
     @abstractmethod
-    def _get_possible_moves(self, actor: 'Mob', geomap: Map, player: PlayerCharacter) -> tp.List[MapCoordinates]:
+    def _get_possible_moves(self, actor: Mob, geomap: Map, player: PlayerCharacter) -> tp.List[MapCoordinates]:
         pass
 
 
 class AggressiveBehaviour(Behaviour):
-    def _get_possible_moves(self, actor: 'Mob', geomap: Map, player: PlayerCharacter) -> tp.List[MapCoordinates]:
+    def _get_possible_moves(self, actor: Mob, geomap: Map, player: PlayerCharacter) -> tp.List[MapCoordinates]:
         return _get_possible_creature_moves(CreatureMove.MOVE_CLOSER, actor, geomap, player)
 
 
 class CowardlyBehaviour(Behaviour):
-    def _get_possible_moves(self, actor: 'Mob', geomap: Map, player: PlayerCharacter) -> tp.List[MapCoordinates]:
+    def _get_possible_moves(self, actor: Mob, geomap: Map, player: PlayerCharacter) -> tp.List[MapCoordinates]:
         return _get_possible_creature_moves(CreatureMove.MOVE_AWAY, actor, geomap, player)
 
 
 class PassiveBehaviour(Behaviour):
-    def _get_possible_moves(self, actor: 'Mob', geomap: Map, player: PlayerCharacter) -> tp.List[MapCoordinates]:
+    def _get_possible_moves(self, actor: Mob, geomap: Map, player: PlayerCharacter) -> tp.List[MapCoordinates]:
         return []
 
 
@@ -136,7 +144,7 @@ class NPC(Creature):
         self._action_radius = radius
 
     @abstractmethod
-    def act(self, geomap: Map, player: PlayerCharacter) -> None:
+    def act(self, env: Environment, player: PlayerCharacter) -> None:
         pass
 
     @property
@@ -144,7 +152,7 @@ class NPC(Creature):
         return self._action_radius
 
 
-@drawable('demon.png')
+@drawable('npc.png')
 class Mob(NPC):
     """Normal enemy"""
 
@@ -152,11 +160,11 @@ class Mob(NPC):
         super().__init__(level, stats, radius)
         self._behaviour = behaviour
 
-    def act(self, geomap: Map, player: PlayerCharacter) -> None:
-        self._behaviour.act(self, geomap, player)
+    def act(self, env: Environment, player: PlayerCharacter) -> None:
+        self._behaviour.act(self, env, player)
 
 
-@drawable('pepe.png')
+@drawable('confused.png')
 class ConfusedMob(NPC):
     """Enemy in a confused state"""
 
@@ -172,19 +180,19 @@ class ConfusedMob(NPC):
     def _get_normal(self) -> NPC:
         return self._normal
 
-    def _act_confused(self, geomap: Map, coordinates: MapCoordinates) -> None:
-        possible_coordinates = geomap.get_neighbours(coordinates)
+    def _act_confused(self, env: Environment, coordinates: MapCoordinates) -> None:
+        possible_coordinates = env.map.get_neighbours(coordinates)
         new_coordinates = random.choice(possible_coordinates)
-        if _coord_has_objects_of_types(new_coordinates, geomap, [Creature, Obstacle]):
+        if _coord_has_objects_of_types(new_coordinates, env.map, [Creature, Obstacle]):
             return
-        geomap.move_to(self, new_coordinates)
+        env.map.move_to(self, new_coordinates)
 
-    def act(self, geomap: Map, player: PlayerCharacter) -> None:
-        coordinates = geomap.get_coordinates(self)
+    def act(self, env: Environment, player: PlayerCharacter) -> None:
+        coordinates = env.map.get_coordinates(self)
         if coordinates is None:
             raise RuntimeError
 
-        self._act_confused(geomap, coordinates)
+        self._act_confused(env, coordinates)
 
         self._timeout -= 1
         if self._timeout == 0:
@@ -193,3 +201,47 @@ class ConfusedMob(NPC):
     def take_damage(self, power: int) -> None:
         super().take_damage(power)
         self._normal.take_damage(power)
+
+
+@drawable('npc_replicating.png')
+class ReplicatingMob(Mob):
+    """Enemy that can replicate"""
+
+    def __init__(
+            self,
+            level: int,
+            stats: Stats,
+            radius: int,
+            behaviour: Behaviour,
+            replication_rate: float,
+            replication_rate_decay: float,
+    ) -> None:
+        super().__init__(level, stats, radius, behaviour)
+        self._replication_rate = replication_rate
+        self._replication_rate_decay = replication_rate_decay
+
+    def _get_replica_location(self, geomap: Map) -> tp.Optional[MapCoordinates]:
+        self_coordinate = geomap.get_coordinates(self)
+        if self_coordinate is None:
+            raise ValueError('Could not find replicating mob location on map. Is it placed there?')
+        possible_spawn_locations = [
+            location for location in geomap.get_neighbours(self_coordinate)
+            if not geomap.get_objects(location)
+        ]
+        if not possible_spawn_locations:
+            return None
+        return random.choice(possible_spawn_locations)
+
+    def _replicate(self, env: Environment) -> None:
+        replica_spawn_location = self._get_replica_location(env.map)
+        if replica_spawn_location is None:
+            return
+        self._replication_rate *= self._replication_rate_decay
+        replicated_mob = deepcopy(self)
+        env.map.add_object(replica_spawn_location, replicated_mob)
+        env.enemies.add(replicated_mob)
+
+    def act(self, env: Environment, player: PlayerCharacter) -> None:
+        super().act(env, player)
+        if random.random() < self._replication_rate:
+            self._replicate(env)

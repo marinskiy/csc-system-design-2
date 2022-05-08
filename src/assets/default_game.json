@@ -58,6 +58,10 @@
           50
         ]
       }
+    },
+    "replicating_mob":  {
+      "replication_rate": [0.0, 0.05],
+      "replication_rate_decay": [0.5, 1.0]
     }
   },
   "wheel": {
@@ -65,13 +69,15 @@
       "obstacle",
       "treasure",
       "mob",
+      "replicating_mob",
       "none"
     ],
     "weights": [
-      16,
+      30,
+      2,
       1,
       1,
-      84
+      200
     ]
   }
 }

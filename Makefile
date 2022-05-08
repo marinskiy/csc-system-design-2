@@ -1,12 +1,26 @@
 .DEFAULT_GOAL     := help # when you run make, it defaults to printing available commands
 
-CONDA_ENV_SPEC = ${PWD}/environment.yml
+# Current Repo Path
+# discover the absolute path to the project repo on the host machine
+ifeq ($(OS),Windows_NT)
+	# * docker driver does not support path-based volume mounts with special characters in the source or target mount path
+	# * 'space' character is considered a special character and is quite common as a user name on firm laptops
+	#   for example: C:\Users\Tom Smith\Documents\some_repo
+	# * here we are using powershell to discover the MS DOS 'short-path'
+	#   which is an equivalant path expression but without any spaces.
+	#   for example, the user path above would look something like this: C:\Users\TOM~1\DOCUME~1\some_repo
+	REPO_DIR := $(shell powershell "(New-Object -ComObject Scripting.FileSystemObject).GetFolder('.').ShortPath")
+else
+	REPO_DIR := "$$(pwd)"
+endif
 
-VENV=${PWD}/venv
+CONDA_ENV_SPEC = ${REPO_DIR}/environment.yml
+
+VENV=${REPO_DIR}/venv
 VENV_PIP=${VENV}/bin/pip
 VENV_PYTHON=${VENV}/bin/python
 
-TEST_VENV_NAME=${PWD}/testing_venv
+TEST_VENV_NAME=${REPO_DIR}/testing_venv
 TEST_PIP=${TEST_VENV_NAME}/bin/pip
 TEST_PYTHON=${TEST_VENV_NAME}/bin/python
 
@@ -18,19 +32,6 @@ TEST_PYLINT=${TEST_VENV_NAME}/bin/pylint
 SOURCES := src/roguelike
 TESTS := src/tests
 
-
-# discover the absolute path to the project repo on the host machine
-ifeq ($(OS),Windows_NT)
-	# * docker driver does not support path-based volume mounts with special characters in the source or target mount path
-	# * 'space' character is considered a special character and is quite common as a user name on firm laptops
-	#   for example: C:\Users\Tom Smith\Documents\optimus
-	# * here we are using powershell to discover the MS DOS 'short-path'
-	#   which is an equivalant path expression but without any spaces.
-	#   for example, the user path above would look something like this: C:\Users\TOM~1\DOCUME~1\optimus
-	OPTIMUS_DIR := $(shell powershell "(New-Object -ComObject Scripting.FileSystemObject).GetFolder('.').ShortPath")
-else
-	OPTIMUS_DIR := "$$(pwd)"
-endif
 
 .PHONY: help
 help:  ## Show all make commands

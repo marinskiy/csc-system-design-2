@@ -1,28 +1,34 @@
 """
 Contains all classes needed to generate game
 """
-
-import typing as tp
-import random
-import os
+import itertools
 import json
+import os
+import random
+import typing as tp
 
-from roguelike.game_engine.env_manager.enemies import Mob, BehaviourFactory, NPC
-from roguelike.game_engine.env_manager.env_manager import Environment, Inventory
+from roguelike.game_engine.env_manager.enemies import Mob, BehaviourFactory, NPC, Behaviour, ReplicatingMob
+from roguelike.game_engine.env_manager.env_manager import Environment, Inventory, SupportsNpcProtocol
 from roguelike.game_engine.env_manager.map import Map, MapCoordinates
-from roguelike.game_engine.game_manager.game_constructor.game_loader import check_dict_fields
 from roguelike.game_engine.env_manager.map_objects_storage import Stats, PlayerCharacter, Obstacle, Treasure, \
     MapObject
+from roguelike.game_engine.game_manager.game_constructor.game_loader import check_dict_fields
 from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Mode
 
 DEFAULT_GAME_SETTINGS_FILE = os.path.join(os.path.dirname(__file__), "../../../../assets/default_game.json")
 MOB_STATS_INCREASE_PER_LEVEL = 0.1
 
 
-def get_random_int_from_range(value: tp.List[tp.Union[int]]) -> int:
+def get_random_int_from_range(value: tp.List[int]) -> int:
     if len(value) != 2 or value[0] > value[1]:
         raise ValueError("Invalid value range")
     return random.randint(value[0], value[1])
+
+
+def get_random_float_from_range(value: tp.List[float]) -> float:
+    if len(value) != 2 or value[0] > value[1]:
+        raise ValueError("Invalid value range")
+    return random.uniform(value[0], value[1])
 
 
 class StatsGenerator:
@@ -117,14 +123,38 @@ class MobGenerator:
         stat.health = int(stat.health * (1 + MOB_STATS_INCREASE_PER_LEVEL * level))
         stat.attack = int(stat.attack * (1 + MOB_STATS_INCREASE_PER_LEVEL * level))
 
-    def generate(self) -> Mob:
+    def generate_parameters(self) -> tp.Tuple[int, Stats, int, Behaviour]:
         level = get_random_int_from_range(self.level_range)
         radius = get_random_int_from_range(self.radius_range)
         stats = self.stats_generator.generate()
         self._apply_level(stats, level)
         behaviour = BehaviourFactory.get_behaviour(random.choice(self.behaviours_list))
 
-        return Mob(level, stats, radius, behaviour)
+        return level, stats, radius, behaviour
+
+    def generate(self) -> Mob:
+        return Mob(*self.generate_parameters())
+
+
+class ReplicatingMobGenerator:
+    """Produces replicating mobs based on settings and MobGenerator"""
+
+    def __init__(self, mob_generator: MobGenerator, settings: tp.Dict[str, tp.Any]) -> None:
+        self._validate_input(settings)
+        self.mob_generator = mob_generator
+        self.replication_rate_range = settings["replication_rate"]
+        self.replication_rate_decay_range = settings["replication_rate_decay"]
+
+    @staticmethod
+    def _validate_input(settings: tp.Dict[str, tp.Any]) -> None:
+        if not check_dict_fields(settings, ["replication_rate", "replication_rate_decay"]):
+            raise ValueError("Invalid replication mob settings json")
+
+    def generate(self) -> ReplicatingMob:
+        replication_rate = get_random_float_from_range(self.replication_rate_range)
+        replication_rate_decay = get_random_float_from_range(self.replication_rate_decay_range)
+        level, stats, radius, behaviour = self.mob_generator.generate_parameters()
+        return ReplicatingMob(level, stats, radius, behaviour, replication_rate, replication_rate_decay)
 
 
 class MapObjectGenerator:
@@ -136,11 +166,12 @@ class MapObjectGenerator:
         self.obstacle_generator = ObstacleGenerator(settings["obstacle"])
         self.treasure_generator = TreasureGenerator(settings["treasure"])
         self.mob_generator = MobGenerator(settings["mob"])
+        self.replicating_mob_generator = ReplicatingMobGenerator(self.mob_generator, settings["replicating_mob"])
 
     @staticmethod
     def _validate_input(settings: tp.Dict[str, tp.Any]) -> None:
-        if not check_dict_fields(settings, ["player", "obstacle", "treasure", "mob"]):
-            raise ValueError("Invalid treasure settings json")
+        if not check_dict_fields(settings, ["player", "obstacle", "treasure", "mob", "replicating_mob"]):
+            raise ValueError("Invalid world_objects settings json")
 
     def generate(self, key: str) -> MapObject:
         if key == "player":
@@ -151,6 +182,8 @@ class MapObjectGenerator:
             return self.treasure_generator.generate()
         elif key == "mob":
             return self.mob_generator.generate()
+        elif key == "replicating_mob":
+            return self.replicating_mob_generator.generate()
         else:
             raise ValueError("No such MapObject")
 
@@ -213,28 +246,25 @@ class GameGenerator:
         return settings
 
     def generate(self) -> GameState:
-        world_objects: tp.List[MapObject] = []
-        enemies: tp.Set[NPC] = set()
+        enemies: tp.Set[SupportsNpcProtocol] = set()
         geomap = self.map_generator.generate()
 
         player = self.object_generator.generate("player")
         if not isinstance(player, PlayerCharacter):
             raise ValueError("player should have type PlayerCharacter")
-        world_objects.append(player)
         player_coordinates = MapCoordinates(get_random_int_from_range([0, geomap.get_width() - 1]),
                                             get_random_int_from_range([0, geomap.get_height() - 1]))
         geomap.add_object(player_coordinates, player)
 
-        for i in range(geomap.get_width()):
-            for j in range(geomap.get_height()):
-                if len(geomap.get_objects(MapCoordinates(i, j))) == 0:
-                    new_object_type = self.wheel.get_next_object_type()
-                    if new_object_type == "none":
-                        continue
-                    new_object = self.object_generator.generate(new_object_type)
-                    geomap.add_object(MapCoordinates(i, j), new_object)
-                    world_objects.append(new_object)
-                    if isinstance(new_object, NPC):
-                        enemies.add(new_object)
+        for i, j in itertools.product(range(geomap.get_width()),
+                                      range(geomap.get_height())):
+            if len(geomap.get_objects(MapCoordinates(i, j))) == 0:
+                new_object_type = self.wheel.get_next_object_type()
+                if new_object_type == "none":
+                    continue
+                new_object = self.object_generator.generate(new_object_type)
+                geomap.add_object(MapCoordinates(i, j), new_object)
+                if isinstance(new_object, NPC):
+                    enemies.add(new_object)
 
-        return GameState(Mode.MAP, Environment(geomap, world_objects, enemies), Inventory([]), player)
+        return GameState(Mode.MAP, Environment(geomap, enemies), Inventory([]), player)

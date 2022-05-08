@@ -1,15 +1,16 @@
 """Contains high level classes for managing environment"""
 
+from __future__ import annotations
+
 import typing as tp
 from dataclasses import dataclass
 
 from PIL import Image
 
 from roguelike import const
-from roguelike.game_engine.env_manager.enemies import NPC
 from roguelike.game_engine.env_manager.map import Map
+from roguelike.game_engine.env_manager.map_objects_storage import Treasure, Stats, PlayerCharacter
 from roguelike.ui.drawable import Drawable, load_image_resource
-from roguelike.game_engine.env_manager.map_objects_storage import Treasure, MapObject, Stats
 
 
 class InventoryPresenter(Drawable):
@@ -35,15 +36,24 @@ class InventoryPresenter(Drawable):
             return self._treasures[self._current]
         return None
 
-    def _draw_inventory_cell(self, treasure_id: int, cell_size: int, mark_as_selected: bool) -> Image:
+    def _draw_inventory_cell(
+            self,
+            treasure_id: int,
+            cell_size: int,
+            mark_as_selected: bool,
+    ) -> Image:
+        storage = load_image_resource('empty_inventory.png', cell_size, cell_size).copy()
         if treasure_id >= len(self._treasures):
-            return load_image_resource('empty_inventory.png', cell_size, cell_size)
+            return storage
         if not mark_as_selected:
-            return self._treasures[treasure_id].draw(cell_size, cell_size, draw_stats=True)
-        result = Image.new('RGB', (cell_size, cell_size), color='blue')
+            treasure = self._treasures[treasure_id].draw(cell_size, cell_size, draw_stats=True)
+            storage.paste(treasure, (5, 5), treasure)
+            return storage
+        selection = load_image_resource('inventory_selection.png', cell_size, cell_size)
+        storage.paste(selection, (0, 0), selection)
         treasure_icon = self._treasures[treasure_id].draw(cell_size - 10, cell_size - 10, draw_stats=True)
-        result.paste(treasure_icon, (5, 5))
-        return result
+        storage.paste(treasure_icon, (5, 5), treasure_icon)
+        return storage
 
     def draw(self, width: int, height: int) -> Image:
         assert width // const.INVENTORY_WIDTH == height // const.INVENTORY_HEIGHT
@@ -89,8 +99,29 @@ class Inventory:
         return self._presenter
 
 
+class SupportsNpcProtocol(tp.Protocol):
+    """Adapter used instead of NPC class"""
+
+    def act(self, env: Environment, player: PlayerCharacter) -> None: ...
+
+    @property
+    def action_radius(self) -> int: ...
+
+    @property
+    def attack_power(self) -> int: ...
+
+    def take_damage(self, power: int) -> None: ...
+
+    @property
+    def level(self) -> int: ...
+
+    def is_dead(self) -> int: ...
+
+    @property
+    def stats(self) -> Stats: ...
+
+
 @dataclass
 class Environment:
     map: Map
-    world_objects: tp.List[MapObject]
-    enemies: tp.Set[NPC]
+    enemies: tp.Set[SupportsNpcProtocol]

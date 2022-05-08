@@ -73,9 +73,11 @@ def _attack_creature(
         environment.enemies.add(confused)
 
 
-def _move_player_to(environment: Environment,
-                    player: map_objects_storage.PlayerCharacter,
-                    coordinates: MapCoordinates) -> None:
+def _move_player_to(
+        environment: Environment,
+        player: map_objects_storage.PlayerCharacter,
+        coordinates: MapCoordinates,
+) -> None:
     block = _get_blocking_object(environment.map, coordinates)
     if isinstance(block, map_objects_storage.Obstacle):
         return

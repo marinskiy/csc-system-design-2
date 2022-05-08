@@ -13,6 +13,6 @@ class GameLoop:
 
     def run_game_turn(self, key: Key) -> GameState:
         self._action_manager.get_action(key, self._state)(self._state)
-        for enemy in self._state.environment.enemies:
-            enemy.act(self._state.environment.map, self._state.player)
+        for enemy in self._state.environment.enemies.copy():
+            enemy.act(self._state.environment, self._state.player)
         return self._state
