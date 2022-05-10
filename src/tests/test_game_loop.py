@@ -6,7 +6,8 @@ import pytest
 
 from roguelike.game_engine.env_manager import MapCoordinates
 from roguelike.game_engine.env_manager.map_objects_storage import PlayerCharacter
-from roguelike.game_engine.game_manager.game_constructor import GameLoader
+from roguelike.game_engine.game_manager.game_constructor.saved_game_state_builder import SavedGameStateBuilder
+from roguelike.game_engine.game_manager.game_constructor.game_state_director import GameStateDirector
 from roguelike.game_engine.game_manager.game_processor.game_loop import GameLoop
 from roguelike.game_engine.game_manager.game_processor.game_state import Key, Mode
 
@@ -14,7 +15,8 @@ from roguelike.game_engine.game_manager.game_processor.game_state import Key, Mo
 @pytest.fixture(name="loop")
 def generate_game_loop() -> GameLoop:
     file_path = os.path.join(os.path.dirname(__file__), "test_game.json")
-    return GameLoop(GameLoader.load_game(file_path))
+    state = GameStateDirector(SavedGameStateBuilder().set_path(file_path)).construct()
+    return GameLoop(state)
 
 
 def test_player_makes_move(loop: GameLoop) -> None:

@@ -76,6 +76,24 @@
           "attack": 10
         }
       }
+    },
+    {
+      "type": "replicating_mob",
+      "pos": [
+        5,
+        5
+      ],
+      "settings": {
+        "level": 1,
+        "radius": 7,
+        "behaviour": "aggressive",
+        "stats": {
+          "health": 30,
+          "attack": 10
+        },
+        "replication_rate": 0.5,
+        "replication_rate_decay": 0.5
+      }
     }
   ]
 }
