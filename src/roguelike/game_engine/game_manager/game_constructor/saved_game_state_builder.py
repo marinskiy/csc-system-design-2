@@ -5,11 +5,10 @@ Contains all classes needed to load game
 import json
 import typing as tp
 
-from roguelike.game_engine.env_manager import MapCoordinates, Map, Environment, Inventory, Stats, MapObject
-from roguelike.game_engine.env_manager.enemies import Mob, BehaviourFactory, NPC, ReplicatingMob
-from roguelike.game_engine.env_manager.env_manager import SupportsNpcProtocol
+from roguelike.game_engine.env_manager import MapCoordinates, Map, Stats, MapObject
+from roguelike.game_engine.env_manager.enemies import Mob, BehaviourFactory, ReplicatingMob
 from roguelike.game_engine.env_manager.map_objects_storage import Obstacle, Treasure, PlayerCharacter
-from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Mode
+from roguelike.game_engine.game_manager.game_constructor.game_state_director import GameStateBuilder
 
 
 def check_dict_fields(value: tp.Dict[str, tp.Any], names: tp.List[str]) -> bool:
@@ -28,15 +27,22 @@ def _validate_mob_settings_fields(value: tp.Dict[str, tp.Any]) -> bool:
            BehaviourFactory.is_valid_key(value["behaviour"])
 
 
-class GameLoader:
+class SavedGameStateBuilder(GameStateBuilder):
     """Loads GameState from file"""
 
-    @staticmethod
-    def load_game(path: str) -> GameState:
-        with open(path, encoding="utf-8") as json_file:
+    def __init__(self) -> None:
+        self._path = ""
+
+    def set_path(self, path: str) -> "SavedGameStateBuilder":
+        self._path = path
+        return self
+
+    def build(self) -> tp.Tuple[Map, tp.List[tp.Tuple[MapObject, MapCoordinates]]]:
+        if not self._path:
+            raise RuntimeError("You need to set map path before building game state with SavedGameStateBuilder")
+        with open(self._path, encoding="utf-8") as json_file:
             world_data = json.load(json_file)
-        geomap, enemies, player = GameLoader._load_world(world_data)
-        return GameState(Mode.MAP, Environment(geomap, enemies), Inventory([]), player)
+        return SavedGameStateBuilder._load_world(world_data)
 
     @staticmethod
     def _load_coordinates(value: tp.List[int]) -> MapCoordinates:
@@ -60,7 +66,7 @@ class GameLoader:
     def _load_treasure(value: tp.Dict[str, tp.Any]) -> Treasure:
         if not check_dict_fields(value, ["name", "stats"]) or not isinstance(value["name"], str):
             raise ValueError("Invalid treasure settings json")
-        return Treasure(value["name"], GameLoader._load_stats(value["stats"]))
+        return Treasure(value["name"], SavedGameStateBuilder._load_stats(value["stats"]))
 
     @staticmethod
     def _load_mob(value: tp.Dict[str, tp.Any]) -> Mob:
@@ -68,7 +74,7 @@ class GameLoader:
                 not _validate_mob_settings_fields(value):
             raise ValueError("Invalid mob settings json")
 
-        return Mob(value["level"], GameLoader._load_stats(value["stats"]), value["radius"],
+        return Mob(value["level"], SavedGameStateBuilder._load_stats(value["stats"]), value["radius"],
                    BehaviourFactory.get_behaviour(value["behaviour"]))
 
     @staticmethod
@@ -80,7 +86,7 @@ class GameLoader:
                 not isinstance(value["replication_rate_decay"], float):
             raise ValueError("Invalid replicating mob settings json")
 
-        return ReplicatingMob(value["level"], GameLoader._load_stats(value["stats"]), value["radius"],
+        return ReplicatingMob(value["level"], SavedGameStateBuilder._load_stats(value["stats"]), value["radius"],
                               BehaviourFactory.get_behaviour(value["behaviour"]), value["replication_rate"],
                               value["replication_rate_decay"])
 
@@ -88,7 +94,7 @@ class GameLoader:
     def _load_player(value: tp.Dict[str, tp.Any]) -> PlayerCharacter:
         if not check_dict_fields(value, ["stats"]):
             raise ValueError("Invalid player settings json")
-        return PlayerCharacter(GameLoader._load_stats(value["stats"]))
+        return PlayerCharacter(SavedGameStateBuilder._load_stats(value["stats"]))
 
     @staticmethod
     def _load_map(value: tp.Dict[str, int]) -> Map:
@@ -102,37 +108,31 @@ class GameLoader:
                 value["type"] not in ["player", "obstacle", "treasure", "mob", "replicating_mob"]:
             raise ValueError("Invalid map object json format")
 
-        coords = GameLoader._load_coordinates(value["pos"])
+        coords = SavedGameStateBuilder._load_coordinates(value["pos"])
         world_object: MapObject
 
         if value["type"] == "player":
-            world_object = GameLoader._load_player(value["settings"])
+            world_object = SavedGameStateBuilder._load_player(value["settings"])
         elif value["type"] == "obstacle":
-            world_object = GameLoader._load_obstacle(value["settings"])
+            world_object = SavedGameStateBuilder._load_obstacle(value["settings"])
         elif value["type"] == "treasure":
-            world_object = GameLoader._load_treasure(value["settings"])
+            world_object = SavedGameStateBuilder._load_treasure(value["settings"])
         elif value["type"] == "mob":
-            world_object = GameLoader._load_mob(value["settings"])
+            world_object = SavedGameStateBuilder._load_mob(value["settings"])
         elif value["type"] == "replicating_mob":
-            world_object = GameLoader._load_replicating_mob(value["settings"])
+            world_object = SavedGameStateBuilder._load_replicating_mob(value["settings"])
 
         return world_object, coords
 
     @staticmethod
-    def _load_world(value: tp.Dict[str, tp.Any]) -> tp.Tuple[Map, tp.Set[SupportsNpcProtocol], PlayerCharacter]:
+    def _load_world(value: tp.Dict[str, tp.Any]) -> tp.Tuple[Map, tp.List[tp.Tuple[MapObject, MapCoordinates]]]:
         if not check_dict_fields(value, ["map", "objects"]) or not isinstance(value["objects"], list):
             raise ValueError("Invalid json format")
 
-        geomap = GameLoader._load_map(value["map"])
-        enemies: tp.Set[SupportsNpcProtocol] = set()
+        geomap = SavedGameStateBuilder._load_map(value["map"])
+        world_objects_with_coords: tp.List[tp.Tuple[MapObject, MapCoordinates]] = []
 
         for map_object_json in value["objects"]:
-            world_object, coords = GameLoader._load_world_object(map_object_json)
+            world_objects_with_coords.append(SavedGameStateBuilder._load_world_object(map_object_json))
 
-            if isinstance(world_object, PlayerCharacter):
-                player = world_object
-            if isinstance(world_object, NPC):
-                enemies.add(world_object)
-            geomap.add_object(coords, world_object)
-
-        return geomap, enemies, player
+        return geomap, world_objects_with_coords

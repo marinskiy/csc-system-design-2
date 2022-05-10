@@ -6,8 +6,10 @@ import argparse
 import os
 import typing as tp
 
-from roguelike.game_engine.game_manager import GameLoop, GameLoader
+from roguelike.game_engine.game_manager import GameLoop
 from roguelike.game_engine.game_manager.game_constructor.game_generator import GameGenerator
+from roguelike.game_engine.game_manager.game_constructor.saved_game_state_builder import SavedGameStateBuilder
+from roguelike.game_engine.game_manager.game_constructor.game_state_director import GameStateDirector
 from roguelike.game_engine.game_manager.game_processor.game_state import GameState
 from roguelike.ui.drawer import Drawer
 from roguelike.ui.keyboard_interpreter import KeyboardInterpreter
@@ -29,7 +31,7 @@ def map_path(path: str) -> str:
 def get_game_state() -> GameState:
     args = parse_arguments()
     if args.path is not None:
-        return GameLoader.load_game(args.path)
+        return GameStateDirector(SavedGameStateBuilder().set_path(args.path)).construct()
     else:
         return GameGenerator().generate()
 

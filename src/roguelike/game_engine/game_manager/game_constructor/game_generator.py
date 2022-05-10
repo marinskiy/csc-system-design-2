@@ -12,7 +12,7 @@ from roguelike.game_engine.env_manager.env_manager import Environment, Inventory
 from roguelike.game_engine.env_manager.map import Map, MapCoordinates
 from roguelike.game_engine.env_manager.map_objects_storage import Stats, PlayerCharacter, Obstacle, Treasure, \
     MapObject
-from roguelike.game_engine.game_manager.game_constructor.game_loader import check_dict_fields
+from roguelike.game_engine.game_manager.game_constructor.saved_game_state_builder import check_dict_fields
 from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Mode
 
 DEFAULT_GAME_SETTINGS_FILE = os.path.join(os.path.dirname(__file__), "../../../../assets/default_game.json")
