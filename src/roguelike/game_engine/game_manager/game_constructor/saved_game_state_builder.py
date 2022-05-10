@@ -31,14 +31,14 @@ class SavedGameStateBuilder(GameStateBuilder):
     """Loads GameState from file"""
 
     def __init__(self) -> None:
-        self._path = ""
+        self._path: tp.Optional[str] = None
 
     def set_path(self, path: str) -> "SavedGameStateBuilder":
         self._path = path
         return self
 
     def build(self) -> tp.Tuple[Map, tp.List[tp.Tuple[MapObject, MapCoordinates]]]:
-        if not self._path:
+        if self._path is None:
             raise RuntimeError("You need to set map path before building game state with SavedGameStateBuilder")
         with open(self._path, encoding="utf-8") as json_file:
             world_data = json.load(json_file)
