@@ -6,7 +6,7 @@ import json
 import typing as tp
 
 from roguelike.game_engine.env_manager import MapCoordinates, Map, Environment, Inventory, Stats, MapObject
-from roguelike.game_engine.env_manager.enemies import Mob, BehaviourFactory, NPC
+from roguelike.game_engine.env_manager.enemies import Mob, BehaviourFactory, NPC, ReplicatingMob
 from roguelike.game_engine.env_manager.env_manager import SupportsNpcProtocol
 from roguelike.game_engine.env_manager.map_objects_storage import Obstacle, Treasure, PlayerCharacter
 from roguelike.game_engine.game_manager.game_processor.game_state import GameState, Mode
@@ -19,6 +19,13 @@ def check_dict_fields(value: tp.Dict[str, tp.Any], names: tp.List[str]) -> bool:
         if name not in value.keys():
             return False
     return True
+
+
+def _validate_mob_settings_fields(value: tp.Dict[str, tp.Any]) -> bool:
+    return isinstance(value["level"], int) and \
+           isinstance(value["radius"], int) and \
+           isinstance(value["behaviour"], str) and \
+           BehaviourFactory.is_valid_key(value["behaviour"])
 
 
 class GameLoader:
@@ -58,12 +65,24 @@ class GameLoader:
     @staticmethod
     def _load_mob(value: tp.Dict[str, tp.Any]) -> Mob:
         if not check_dict_fields(value, ["level", "radius", "behaviour", "stats"]) or \
-                not isinstance(value["level"], int) or not isinstance(value["radius"], int) or \
-                not isinstance(value["behaviour"], str) or not BehaviourFactory.is_valid_key(value["behaviour"]):
+                not _validate_mob_settings_fields(value):
             raise ValueError("Invalid mob settings json")
 
         return Mob(value["level"], GameLoader._load_stats(value["stats"]), value["radius"],
                    BehaviourFactory.get_behaviour(value["behaviour"]))
+
+    @staticmethod
+    def _load_replicating_mob(value: tp.Dict[str, tp.Any]) -> ReplicatingMob:
+        if not check_dict_fields(value, ["level", "radius", "behaviour", "stats", "replication_rate",
+                                         "replication_rate_decay"]) or \
+                not _validate_mob_settings_fields(value) or \
+                not isinstance(value["replication_rate"], float) or \
+                not isinstance(value["replication_rate_decay"], float):
+            raise ValueError("Invalid replicating mob settings json")
+
+        return ReplicatingMob(value["level"], GameLoader._load_stats(value["stats"]), value["radius"],
+                              BehaviourFactory.get_behaviour(value["behaviour"]), value["replication_rate"],
+                              value["replication_rate_decay"])
 
     @staticmethod
     def _load_player(value: tp.Dict[str, tp.Any]) -> PlayerCharacter:
@@ -80,7 +99,7 @@ class GameLoader:
     @staticmethod
     def _load_world_object(value: tp.Dict[str, tp.Any]) -> tp.Tuple[MapObject, MapCoordinates]:
         if not check_dict_fields(value, ["type", "pos", "settings"]) or \
-                value["type"] not in ["player", "obstacle", "treasure", "mob"]:
+                value["type"] not in ["player", "obstacle", "treasure", "mob", "replicating_mob"]:
             raise ValueError("Invalid map object json format")
 
         coords = GameLoader._load_coordinates(value["pos"])
@@ -94,6 +113,8 @@ class GameLoader:
             world_object = GameLoader._load_treasure(value["settings"])
         elif value["type"] == "mob":
             world_object = GameLoader._load_mob(value["settings"])
+        elif value["type"] == "replicating_mob":
+            world_object = GameLoader._load_replicating_mob(value["settings"])
 
         return world_object, coords
 

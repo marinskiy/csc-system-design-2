@@ -5,7 +5,7 @@ import os
 import pytest
 
 from roguelike.game_engine.env_manager import MapCoordinates
-from roguelike.game_engine.env_manager.enemies import AggressiveBehaviour, Mob
+from roguelike.game_engine.env_manager.enemies import AggressiveBehaviour, Mob, ReplicatingMob
 from roguelike.game_engine.env_manager.map_objects_storage import Stats, Obstacle, Treasure, PlayerCharacter
 from roguelike.game_engine.game_manager.game_constructor import GameLoader
 
@@ -77,6 +77,37 @@ def test_mob_load_correctly() -> None:
         )
 
 
+def test_replicating_mob_load_correctly() -> None:
+    test_replicating_mob = GameLoader._load_replicating_mob(  # pylint: disable=W0212
+        {
+            "level": 1,
+            "radius": 7,
+            "behaviour": "aggressive",
+            "stats": {"health": 30, "attack": 10},
+            "replication_rate": 0.5,
+            "replication_rate_decay": 0.5
+        }
+    )
+
+    assert test_replicating_mob.level == 1
+    assert test_replicating_mob.action_radius == 7
+    assert isinstance(test_replicating_mob._behaviour, AggressiveBehaviour)  # pylint: disable=W0212
+    assert test_replicating_mob.stats == Stats(30, 10)
+    assert test_replicating_mob._replication_rate == 0.5  # pylint: disable=W0212
+    assert test_replicating_mob._replication_rate_decay == 0.5  # pylint: disable=W0212
+
+    with pytest.raises(ValueError):
+        GameLoader._load_replicating_mob({})  # pylint: disable=W0212
+    with pytest.raises(ValueError):
+        GameLoader._load_replicating_mob(  # pylint: disable=W0212
+            {
+                "level": 1,
+                "behaviour": "aggressive",
+                "stats": {"health": 30, "attack": 10}
+            }
+        )
+
+
 def test_player_load_correctly() -> None:
     test_player = GameLoader._load_player({"stats": {"health": 10, "attack": 0}})  # pylint: disable=W0212
     assert test_player.stats == Stats(10, 0)
@@ -140,5 +171,7 @@ def test_load_from_file() -> None:
                       PlayerCharacter)
     assert isinstance(list(state.environment.map.get_objects(MapCoordinates(37, 35)))[0],
                       Mob)
+    assert isinstance(list(state.environment.map.get_objects(MapCoordinates(5, 5)))[0],
+                      ReplicatingMob)
 
-    assert len(state.environment.enemies) == 1
+    assert len(state.environment.enemies) == 2
