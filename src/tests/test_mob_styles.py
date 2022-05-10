@@ -84,23 +84,3 @@ def test_replicating_mob_replicates() -> None:
     assert isinstance(second_replica, ReplicatingMob)
     assert env.enemies == {mob, first_replica, second_replica}
     check_mob_is_the_same(mob, second_replica)
-
-
-def test_replicating_mob_does_not_replicate_into_occupied_cells() -> None:
-    # todo
-    pass
-
-
-def test_replicating_mob_acts_after_replication() -> None:
-    # todo
-    pass
-
-
-def test_replicated_mob_is_independent_of_parent() -> None:
-    # todo
-    pass
-
-
-def test_replication_works_with_decreasing_probability() -> None:
-    # todo
-    pass
