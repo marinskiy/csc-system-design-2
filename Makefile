@@ -143,4 +143,4 @@ local-env-update: .local-conda-env-update .install  ## Update local conda env
 
 .PHONY: launch
 launch: ## Launch roguelike
-	sudo ${VENV_PYTHON} -m roguelike
+	sudo DOTA_ENV=${DOTA_ENV} ${VENV_PYTHON} -m roguelike
