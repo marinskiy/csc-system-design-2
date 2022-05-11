@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 """
 Contains all classes needed to generate game
 """
@@ -99,16 +100,31 @@ class TreasureBuilder:
         return Treasure(random.choice(self.names_list), self.stats_generator.build())
 
 
-class MobFactory:
-    """Generates mobs"""
-    @staticmethod
-    def get_mob(style, *args) -> Mob:   # type: ignore
+class AbstractMobFactory:
+    """Abstract factory for generating mobs"""
+
+    DRAW_FLAVOUR = None
+
+    @classmethod
+    def get_mob(cls, style, *args) -> Mob:   # type: ignore
         if style == MobStyle.GHOST:
-            return Ghost(*args)
+            return Ghost(*args, draw_flavour=cls.DRAW_FLAVOUR)  # pylint: disable=E1123
         elif style == MobStyle.ONE_HIT_GUY:
-            return OneHitGuy(*args)
+            return OneHitGuy(*args, draw_flavour=cls.DRAW_FLAVOUR)  # pylint: disable=E1123
         else:
-            return Mob(*args)
+            return Mob(*args, draw_flavour=cls.DRAW_FLAVOUR)  # pylint: disable=E1123
+
+
+class DefaultMobFactory(AbstractMobFactory):
+    """Factory for generating default mobs"""
+
+    DRAW_FLAVOUR = "default"
+
+
+class DotaMobFactory(AbstractMobFactory):
+    """Factory for generating dota mobs"""
+
+    DRAW_FLAVOUR = "dota"
 
 
 class MobBuilder:
@@ -121,7 +137,7 @@ class MobBuilder:
         self.behaviours_list = settings["behaviours"]
         self.stats_generator = StatsBuilder(settings["stats"])
         self.style_indicators = settings["style_indicators"]
-        self._mob_factory = MobFactory()
+        self._mob_factory = DotaMobFactory() if os.environ.get("DOTA_ENV") else DefaultMobFactory()
 
     def _validate_input(self, settings: tp.Dict[str, tp.Any]) -> None:
         if not check_dict_fields(settings, ["style_indicators", "level", "radius", "behaviours", "stats"]) or \
@@ -174,7 +190,10 @@ class ReplicatingMobBuilder:
         replication_rate = get_random_float_from_range(self.replication_rate_range)
         replication_rate_decay = get_random_float_from_range(self.replication_rate_decay_range)
         level, stats, radius, behaviour = self.mob_builder.generate_parameters()
-        return ReplicatingMob(level, stats, radius, behaviour, replication_rate, replication_rate_decay)
+        flavour = "default" if os.environ.get("DOTA_ENV") else "default"
+        return ReplicatingMob(  # pylint: disable=E1123
+            level, stats, radius, behaviour,
+            replication_rate, replication_rate_decay, draw_flavour=flavour)
 
 
 class MapObjectBuilder:
