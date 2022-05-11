@@ -136,11 +136,18 @@ class BehaviourFactory:
         return cls._behaviours[key]
 
 
+class MobStyle(Enum):
+    NORMAL = 'normal'
+    GHOST = 'ghost'
+    ONE_HIT_GUY = 'one_hit_guy'
+
+
 class NPC(Creature):
     """The parent class for enemies"""
 
-    def __init__(self, level: int, stats: Stats, radius: int) -> None:
+    def __init__(self, level: int, stats: Stats, radius: int, style: MobStyle = MobStyle.NORMAL) -> None:
         super().__init__(level, stats)
+        self._style = style
         self._action_radius = radius
 
     @abstractmethod
@@ -151,13 +158,23 @@ class NPC(Creature):
     def action_radius(self) -> int:
         return self._action_radius
 
+    @property
+    def style(self) -> MobStyle:
+        return self._style
+
 
 @drawable('npc.png')
 class Mob(NPC):
     """Normal enemy"""
 
-    def __init__(self, level: int, stats: Stats, radius: int, behaviour: Behaviour) -> None:
-        super().__init__(level, stats, radius)
+    def __init__(
+            self,
+            level: int,
+            stats: Stats,
+            radius: int,
+            behaviour: Behaviour,
+            style: MobStyle = MobStyle.NORMAL) -> None:
+        super().__init__(level, stats, radius, style)
         self._behaviour = behaviour
 
     def act(self, env: Environment, player: PlayerCharacter) -> None:
@@ -245,3 +262,21 @@ class ReplicatingMob(Mob):
         super().act(env, player)
         if random.random() < self._replication_rate:
             self._replicate(env)
+
+
+@drawable('ghost.png')
+class Ghost(Mob):
+    def __init__(self, level: int, stats: Stats, radius: int, behaviour: Behaviour):
+        super().__init__(level, stats, radius, behaviour, MobStyle.GHOST)
+
+    def take_damage(self, power: int) -> None:
+        self.stats.health -= power // 2
+
+
+@drawable('glass.png')
+class OneHitGuy(Mob):
+    def __init__(self, level: int, stats: Stats, radius: int, behaviour: Behaviour):
+        super().__init__(level, stats, radius, behaviour, MobStyle.ONE_HIT_GUY)
+
+    def take_damage(self, power: int) -> None:
+        self.stats.health = 0

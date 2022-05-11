@@ -70,12 +70,12 @@ class SavedGameStateBuilder(GameStateBuilder):
 
     @staticmethod
     def _load_mob(value: tp.Dict[str, tp.Any]) -> Mob:
-        if not check_dict_fields(value, ["level", "radius", "behaviour", "stats"]) or \
+        if not check_dict_fields(value, ["style", "level", "radius", "behaviour", "stats"]) or \
                 not _validate_mob_settings_fields(value):
             raise ValueError("Invalid mob settings json")
 
         return Mob(value["level"], SavedGameStateBuilder._load_stats(value["stats"]), value["radius"],
-                   BehaviourFactory.get_behaviour(value["behaviour"]))
+                   BehaviourFactory.get_behaviour(value["behaviour"]), value["style"])
 
     @staticmethod
     def _load_replicating_mob(value: tp.Dict[str, tp.Any]) -> ReplicatingMob:

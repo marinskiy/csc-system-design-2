@@ -41,6 +41,14 @@
       }
     },
     "mob": {
+      "style_indicators": {
+        "total": 10,
+        "range": {
+          "normal": 6,
+          "ghost": 3,
+          "one_hit_guy": 0
+        }
+      },
       "level": [1, 5],
       "radius": [5, 10],
       "behaviours": [

@@ -4,7 +4,7 @@ import random
 import typing as tp
 
 from roguelike.game_engine.env_manager import MapCoordinates, Map, Environment
-from roguelike.game_engine.env_manager.enemies import ReplicatingMob, PassiveBehaviour, NPC
+from roguelike.game_engine.env_manager.enemies import Ghost, OneHitGuy, ReplicatingMob, PassiveBehaviour, NPC
 from roguelike.game_engine.env_manager.map_objects_storage import Obstacle, Stats, PlayerCharacter
 
 
@@ -30,6 +30,17 @@ def check_mob_is_the_same(mob_first: NPC, mob_second: NPC) -> None:
         mob_second.attack_power,
     )
     assert mob_first_info == mob_second_info
+
+
+def test_mob_style_damage_modificators() -> None:
+    ghost = Ghost(1, Stats(100, 2), 1, PassiveBehaviour())
+    ghost.take_damage(10)
+    assert ghost.stats.health == 95
+
+    one_hit_guy = OneHitGuy(1, Stats(100, 2), 1, PassiveBehaviour())
+    one_hit_guy.take_damage(10)
+    assert one_hit_guy.stats.health == 0
+    assert one_hit_guy.is_dead()
 
 
 def test_replicating_mob_replicates() -> None:

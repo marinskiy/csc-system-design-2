@@ -7,7 +7,8 @@ import os
 import random
 import typing as tp
 
-from roguelike.game_engine.env_manager.enemies import Mob, BehaviourFactory, Behaviour, ReplicatingMob
+from roguelike.game_engine.env_manager.enemies import \
+    MobStyle, Mob, Ghost, OneHitGuy, BehaviourFactory, Behaviour, ReplicatingMob
 from roguelike.game_engine.env_manager.map import Map, MapCoordinates
 from roguelike.game_engine.env_manager.map_objects_storage import Stats, PlayerCharacter, Obstacle, Treasure, \
     MapObject
@@ -98,6 +99,18 @@ class TreasureBuilder:
         return Treasure(random.choice(self.names_list), self.stats_generator.build())
 
 
+class MobFactory:
+    """Generates mobs"""
+    @staticmethod
+    def get_mob(style, *args) -> Mob:   # type: ignore
+        if style == MobStyle.GHOST:
+            return Ghost(*args)
+        elif style == MobStyle.ONE_HIT_GUY:
+            return OneHitGuy(*args)
+        else:
+            return Mob(*args)
+
+
 class MobBuilder:
     """Produces Mobs based on settings"""
 
@@ -107,9 +120,11 @@ class MobBuilder:
         self.radius_range = settings["radius"]
         self.behaviours_list = settings["behaviours"]
         self.stats_generator = StatsBuilder(settings["stats"])
+        self.style_indicators = settings["style_indicators"]
+        self._mob_factory = MobFactory()
 
     def _validate_input(self, settings: tp.Dict[str, tp.Any]) -> None:
-        if not check_dict_fields(settings, ["level", "radius", "behaviours", "stats"]) or \
+        if not check_dict_fields(settings, ["style_indicators", "level", "radius", "behaviours", "stats"]) or \
                 not isinstance(settings["behaviours"], list):
             raise ValueError("Invalid mob settings json")
 
@@ -132,7 +147,13 @@ class MobBuilder:
         return level, stats, radius, behaviour
 
     def build(self) -> Mob:
-        return Mob(*self.generate_parameters())
+        style_ind = get_random_int_from_range([0, self.style_indicators["total"]])
+        style = MobStyle.NORMAL
+        for style_name, border in self.style_indicators["range"].items():
+            if border <= style_ind:
+                style = MobStyle(style_name)
+                break
+        return self._mob_factory.get_mob(style, *self.generate_parameters())
 
 
 class ReplicatingMobBuilder:
