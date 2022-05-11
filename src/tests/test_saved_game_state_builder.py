@@ -54,6 +54,7 @@ def test_treasure_load_correctly() -> None:
 def test_mob_load_correctly() -> None:
     test_mob = SavedGameStateBuilder._load_mob(  # pylint: disable=W0212
         {
+            "style": "normal",
             "level": 1,
             "radius": 7,
             "behaviour": "aggressive",
@@ -139,7 +140,8 @@ def test_map_object_load_correctly() -> None:
 
     test_object, coords = SavedGameStateBuilder._load_world_object(  # pylint: disable=W0212
         {"type": "mob", "pos": [37, 35],
-         "settings": {"level": 1, "radius": 7, "behaviour": "aggressive", "stats": {"health": 30, "attack": 10}}})
+         "settings": {"style": 0, "level": 1, "radius": 7, "behaviour": "aggressive",
+                      "stats": {"health": 30, "attack": 10}}})
     assert isinstance(test_object, Mob)
     assert coords == MapCoordinates(37, 35)
 

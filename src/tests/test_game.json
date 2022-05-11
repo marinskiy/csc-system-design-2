@@ -68,6 +68,7 @@
         35
       ],
       "settings": {
+        "style": "normal",
         "level": 1,
         "radius": 7,
         "behaviour": "aggressive",

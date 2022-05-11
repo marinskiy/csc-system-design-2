@@ -68,7 +68,7 @@ class Creature(MapObject, metaclass=ABCMeta):
         return self._level
 
     def is_dead(self) -> int:
-        return self._stats.health < 0
+        return self._stats.health <= 0
 
     @property
     def stats(self) -> Stats:

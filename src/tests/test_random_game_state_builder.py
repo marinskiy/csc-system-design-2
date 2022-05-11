@@ -1,8 +1,9 @@
 """Game generator tests"""
+import random
 
 import pytest
 
-from roguelike.game_engine.env_manager.enemies import Mob, ReplicatingMob
+from roguelike.game_engine.env_manager.enemies import MobStyle, Mob, ReplicatingMob
 from roguelike.game_engine.env_manager.map import MapCoordinates
 from roguelike.game_engine.env_manager.map_objects_storage import Obstacle, PlayerCharacter, Treasure
 from roguelike.game_engine.game_manager.game_constructor.random_game_state_builder import StatsBuilder, \
@@ -74,12 +75,19 @@ def apply_level_multiplier(value: int, level: int) -> int:
 
 def test_mob_generated_correctly() -> None:
     test_mob = MobBuilder({
+        "style_indicators": {
+            "total": 1,
+            "range": {
+                "normal": 0
+            }
+        },
         "level": [1, 5],
         "radius": [5, 10],
         "behaviours": ["aggressive", "cowardly", "passive"],
         "stats": {"health": [25, 50], "attack": [25, 50]}
     }).build()
 
+    assert test_mob.style == MobStyle.NORMAL
     assert 1 <= test_mob.level <= 5
     assert 5 <= test_mob.action_radius <= 10
     assert apply_level_multiplier(25, test_mob.level) <= test_mob.stats.health <= \
@@ -88,14 +96,41 @@ def test_mob_generated_correctly() -> None:
            apply_level_multiplier(50, test_mob.level)
 
 
+def test_mob_style_generated_correctly() -> None:
+    random.seed(0)
+    params = {
+        "style_indicators": {
+            "total": 10,
+            "range": {
+                "normal": 5,
+                "ghost": 3,
+                "one_hit_guy": 0
+            }
+        },
+        "level": [1, 1],
+        "radius": [5, 5],
+        "behaviours": ["aggressive"],
+        "stats": {"health": [25, 25], "attack": [25, 25]}
+    }
+    styles = [MobStyle.NORMAL, MobStyle.GHOST, MobStyle.ONE_HIT_GUY]
+    for style in styles:
+        test_mob = MobBuilder(params).build()
+        assert test_mob.style == style
+
+
 def test_map_object_generated_correctly() -> None:
     object_generator = MapObjectBuilder(
         {
             "player": {"stats": {"health": [90, 110], "attack": [90, 110]}},
             "obstacle": {},
             "treasure": {"names": ["helmet", "boots", "armor"], "stats": {"health": [-10, 30], "attack": [-10, 30]}},
-            "mob": {"level": [1, 5], "radius": [5, 10], "behaviours": ["aggressive", "cowardly", "passive"],
-                    "stats": {"health": [25, 50], "attack": [25, 50]}},
+            "mob": {"style_indicators": {
+                "total": 1,
+                "range": {
+                    "normal": 0
+                }
+            }, "level": [1, 5], "radius": [5, 10], "behaviours": ["aggressive", "cowardly", "passive"],
+                "stats": {"health": [25, 50], "attack": [25, 50]}},
             "replicating_mob": {"replication_rate": [0.5, 1.0], "replication_rate_decay": [0.5, 1.0]}
         }
     )
