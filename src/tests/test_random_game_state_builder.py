@@ -1,0 +1,207 @@
+"""Game generator tests"""
+import random
+
+import pytest
+
+from roguelike.game_engine.env_manager.enemies import MobStyle, Mob, ReplicatingMob
+from roguelike.game_engine.env_manager.map import MapCoordinates
+from roguelike.game_engine.env_manager.map_objects_storage import Obstacle, PlayerCharacter, Treasure
+from roguelike.game_engine.game_manager.game_constructor.random_game_state_builder import StatsBuilder, \
+    PlayerCharacterBuilder, ObstacleBuilder, TreasureBuilder, MapObjectBuilder, \
+    MapObjectWheel, MapBuilder, get_random_int_from_range, MobBuilder, MOB_STATS_INCREASE_PER_LEVEL, \
+    RandomGameStateBuilder
+from roguelike.game_engine.game_manager.game_constructor.game_state_director import GameStateDirector
+
+
+def test_random_value_from_range() -> None:
+    test_int_value = get_random_int_from_range([0, 100])
+    assert 0 <= test_int_value <= 100
+
+    test_int_value = get_random_int_from_range([0, 0])
+    assert test_int_value == 0
+
+    with pytest.raises(ValueError):
+        get_random_int_from_range([100, 0])
+
+
+def test_stats_generated_correctly() -> None:
+    test_stats = StatsBuilder({"health": [100, 150], "attack": [10, 20]}).build()
+
+    assert 100.0 <= test_stats.health <= 150.0
+    assert 10.0 <= test_stats.attack <= 20.0
+
+    with pytest.raises(ValueError):
+        StatsBuilder({})
+    with pytest.raises(ValueError):
+        StatsBuilder({"health": [100, 110], "attack": [100, 150], "defence": [100, 200]})
+
+
+def test_player_generated_correctly() -> None:
+    test_player = PlayerCharacterBuilder(  # pylint: disable=W0212
+        {"stats": {"health": [10, 20], "attack": [0, 100]}}).build()
+
+    assert 10 <= test_player.stats.health <= 20
+    assert 0 <= test_player.stats.attack <= 100
+
+    with pytest.raises(ValueError):
+        PlayerCharacterBuilder({})
+    with pytest.raises(ValueError):
+        PlayerCharacterBuilder(
+            {"name": "Super Helmet", "stats": {"health": [10, 20], "attack": [0, 100]}})
+
+
+def test_obstacle_generated_correctly() -> None:
+    assert isinstance(ObstacleBuilder({}).build(), Obstacle)
+
+    with pytest.raises(ValueError):
+        ObstacleBuilder({"health": 100, "attack": 100, "defence": 100})
+
+
+def test_treasure_generated_correctly() -> None:
+    test_treasure = TreasureBuilder(
+        {"names": ["Helmet", "Boots"], "stats": {"health": [10, 20], "attack": [0, 30]}}).build()
+    assert test_treasure.name in ["Helmet", "Boots"]
+    assert 10 <= test_treasure.stats.health <= 20
+
+    with pytest.raises(ValueError):
+        TreasureBuilder({})
+    with pytest.raises(ValueError):
+        TreasureBuilder({"health": 100, "attack": 100, "defence": 100})
+
+
+def apply_level_multiplier(value: int, level: int) -> int:
+    return int(value * (1 + MOB_STATS_INCREASE_PER_LEVEL * level))
+
+
+def test_mob_generated_correctly() -> None:
+    test_mob = MobBuilder({
+        "style_indicators": {
+            "total": 1,
+            "range": {
+                "normal": 0
+            }
+        },
+        "level": [1, 5],
+        "radius": [5, 10],
+        "behaviours": ["aggressive", "cowardly", "passive"],
+        "stats": {"health": [25, 50], "attack": [25, 50]}
+    }).build()
+
+    assert test_mob.style == MobStyle.NORMAL
+    assert 1 <= test_mob.level <= 5
+    assert 5 <= test_mob.action_radius <= 10
+    assert apply_level_multiplier(25, test_mob.level) <= test_mob.stats.health <= \
+           apply_level_multiplier(50, test_mob.level)
+    assert apply_level_multiplier(25, test_mob.level) <= test_mob.stats.attack <= \
+           apply_level_multiplier(50, test_mob.level)
+
+
+def test_mob_style_generated_correctly() -> None:
+    random.seed(0)
+    params = {
+        "style_indicators": {
+            "total": 10,
+            "range": {
+                "normal": 5,
+                "ghost": 3,
+                "one_hit_guy": 0
+            }
+        },
+        "level": [1, 1],
+        "radius": [5, 5],
+        "behaviours": ["aggressive"],
+        "stats": {"health": [25, 25], "attack": [25, 25]}
+    }
+    styles = [MobStyle.NORMAL, MobStyle.GHOST, MobStyle.ONE_HIT_GUY]
+    for style in styles:
+        test_mob = MobBuilder(params).build()
+        assert test_mob.style == style
+
+
+def test_map_object_generated_correctly() -> None:
+    object_generator = MapObjectBuilder(
+        {
+            "player": {"stats": {"health": [90, 110], "attack": [90, 110]}},
+            "obstacle": {},
+            "treasure": {"names": ["helmet", "boots", "armor"], "stats": {"health": [-10, 30], "attack": [-10, 30]}},
+            "mob": {"style_indicators": {
+                "total": 1,
+                "range": {
+                    "normal": 0
+                }
+            }, "level": [1, 5], "radius": [5, 10], "behaviours": ["aggressive", "cowardly", "passive"],
+                "stats": {"health": [25, 50], "attack": [25, 50]}},
+            "replicating_mob": {"replication_rate": [0.5, 1.0], "replication_rate_decay": [0.5, 1.0]}
+        }
+    )
+
+    test_player = object_generator.build("player")
+    assert isinstance(test_player, PlayerCharacter)
+    assert 90 <= test_player.stats.health <= 110
+    assert 90 <= test_player.stats.attack <= 110
+
+    test_obstacle = object_generator.build("obstacle")
+    assert isinstance(test_obstacle, Obstacle)
+
+    test_treasure = object_generator.build("treasure")
+    assert isinstance(test_treasure, Treasure)
+    assert test_treasure.name in ["helmet", "boots", "armor"]
+    assert -10 <= test_treasure.stats.health <= 30
+    assert -10 <= test_treasure.stats.attack <= 30
+
+    test_mob = object_generator.build("mob")
+    assert isinstance(test_mob, Mob)
+    assert 1 <= test_mob.level <= 5
+    assert 5 <= test_mob.action_radius <= 10
+    assert apply_level_multiplier(25, test_mob.level) <= test_mob.stats.health <= \
+           apply_level_multiplier(50, test_mob.level)
+    assert apply_level_multiplier(25, test_mob.level) <= test_mob.stats.attack <= \
+           apply_level_multiplier(50, test_mob.level)
+
+    test_replicating_mob = object_generator.build("replicating_mob")
+    assert isinstance(test_replicating_mob, ReplicatingMob)
+    assert 0.5 <= test_replicating_mob._replication_rate <= 1.0  # pylint: disable=W0212
+    assert 0.5 <= test_replicating_mob._replication_rate_decay <= 1.0  # pylint: disable=W0212
+
+    with pytest.raises(ValueError):
+        object_generator.build("none")
+
+
+def test_wheel() -> None:
+    wheel = MapObjectWheel({"population": ["obstacle", "treasure", "none"], "weights": [10, 5, 85]})
+    assert wheel.get_next_object_type() in ["obstacle", "treasure", "none"]
+
+    wheel = MapObjectWheel({"population": ["obstacle", "treasure", "none"], "weights": [100, 0, 0]})
+    assert wheel.get_next_object_type() == "obstacle"
+
+    with pytest.raises(ValueError):
+        MapObjectWheel({})
+    with pytest.raises(ValueError):
+        MapObjectWheel({"population": ["obstacle", "treasure", "none"], "weights": [100, 0, 0, 10]})
+
+
+def test_map_generated_correctly() -> None:
+    test_map = MapBuilder({"width": [30, 100], "height": [1, 10]}).build()
+
+    assert 30 <= test_map.get_width() <= 100
+    assert 1 <= test_map.get_height() <= 10
+
+
+def test_game_state_generated_correctly() -> None:
+
+    state = GameStateDirector(RandomGameStateBuilder()).construct()
+
+    assert 30 <= state.environment.map.get_width() <= 100
+    assert 30 <= state.environment.map.get_height() <= 100
+
+    for i in range(state.environment.map.get_width()):
+        for j in range(state.environment.map.get_height()):
+            assert len(state.environment.map.get_objects(MapCoordinates(i, j))) <= 1
+
+
+def test_can_set_specific_map_dimensions() -> None:
+    builder = RandomGameStateBuilder().set_map_dimensions(10, 11)
+    state = GameStateDirector(builder).construct()
+
+    assert state.environment.map.get_width() == 10
+    assert state.environment.map.get_height() == 11

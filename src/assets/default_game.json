@@ -1,0 +1,91 @@
+{
+  "map": {
+    "width": [
+      50,
+      50
+    ],
+    "height": [
+      30,
+      30
+    ]
+  },
+  "world_objects": {
+    "player": {
+      "stats": {
+        "health": [
+          90.0,
+          110.0
+        ],
+        "attack": [
+          90.0,
+          110.0
+        ]
+      }
+    },
+    "obstacle": {},
+    "treasure": {
+      "names": [
+        "helmet",
+        "boots",
+        "armor"
+      ],
+      "stats": {
+        "health": [
+          -10,
+          30
+        ],
+        "attack": [
+          -10,
+          30
+        ]
+      }
+    },
+    "mob": {
+      "style_indicators": {
+        "total": 10,
+        "range": {
+          "normal": 6,
+          "ghost": 3,
+          "one_hit_guy": 0
+        }
+      },
+      "level": [1, 5],
+      "radius": [5, 10],
+      "behaviours": [
+        "aggressive",
+        "cowardly",
+        "passive"
+      ],
+      "stats": {
+        "health": [
+          25,
+          50
+        ],
+        "attack": [
+          25,
+          50
+        ]
+      }
+    },
+    "replicating_mob":  {
+      "replication_rate": [0.0, 0.05],
+      "replication_rate_decay": [0.5, 1.0]
+    }
+  },
+  "wheel": {
+    "population": [
+      "obstacle",
+      "treasure",
+      "mob",
+      "replicating_mob",
+      "none"
+    ],
+    "weights": [
+      30,
+      2,
+      1,
+      1,
+      200
+    ]
+  }
+}
